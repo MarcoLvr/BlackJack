@@ -1,11 +1,11 @@
-package me.marcolvr.network.packet.clientbound;
+package me.marcolvr.network.packet.serverbound;
 
 import me.marcolvr.network.Connection;
 
-public class ClientboundPlayerUpdate implements ClientboundPacket {
+public class ServerboundHeartbeat implements ServerboundPacket{
     @Override
     public byte getId() {
-        return 0x02; //2
+        return 0x01; //1
     }
 
     @Override

@@ -1,4 +1,4 @@
-package me.marcolvr.game.card;
+package me.marcolvr.game.logic.card;
 
 
 import lombok.Getter;

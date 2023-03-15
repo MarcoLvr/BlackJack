@@ -1,7 +1,7 @@
-package me.marcolvr.game;
+package me.marcolvr.game.logic;
 
-import me.marcolvr.game.card.BlackJackCard;
-import me.marcolvr.game.card.CardSeed;
+import me.marcolvr.game.logic.card.BlackJackCard;
+import me.marcolvr.game.logic.card.CardSeed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,9 +40,6 @@ public class BlackJackGame {
                 mazzo.remove(i);
             }
         }
-
-
-
     }
 
     @Override
