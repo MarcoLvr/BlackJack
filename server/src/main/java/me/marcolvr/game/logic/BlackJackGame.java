@@ -35,7 +35,7 @@ public class BlackJackGame {
                 int random = (int)(Math.random()*104.0);
                 BlackJackCard copia = mazzo.get(i);
                 mazzo.add(random, copia);
-                mazzo.remove(i);
+                mazzo.remove(0);
             }
         }
     }
