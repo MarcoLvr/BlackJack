@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import me.marcolvr.network.Connection;
+import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 
 @AllArgsConstructor
 @Getter
@@ -18,7 +19,7 @@ public class ServerboundACK implements ServerboundPacket{
     }
 
     @Override
-    public void send(Connection con) {
+    public void send(Connection<ClientboundPacket, ServerboundPacket> con) {
         con.sendPacket(this);
     }
 }

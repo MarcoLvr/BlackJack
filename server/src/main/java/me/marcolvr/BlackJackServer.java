@@ -31,13 +31,13 @@ public class BlackJackServer {
 
     public void addPlayer(BlackJackPlayer player){
         players.add(player);
-        Logger.info(player.getConnection().getAddress().toString() + " connected");
+        Logger.info(player.getConnection().getAddress() + " connected");
     }
 
     public boolean setPlayerUsername(BlackJackPlayer player, String username){
         if(players.stream().anyMatch(p -> p.getUsername()!=null && p.getUsername().equalsIgnoreCase(username))) return false;
         player.setUsername(username);
-        Logger.info(player.getConnection().getAddress().toString() + " username is " + player.getUsername());
+        Logger.info(player.getConnection().getAddress() + " username is " + player.getUsername());
         return true;
     }
 
@@ -60,7 +60,7 @@ public class BlackJackServer {
         player.getConnection().close();
         if(player.getRoom()!=null) player.getRoom().removePlayer(player);
         players.remove(player);
-        Logger.info((player.getUsername() != null ? player.getUsername() : player.getConnection().getAddress().toString()) + " disconnected. Reason: " + reason);
+        Logger.info((player.getUsername() != null ? player.getUsername() : player.getConnection().getAddress()) + " disconnected. Reason: " + reason);
     }
 
 }

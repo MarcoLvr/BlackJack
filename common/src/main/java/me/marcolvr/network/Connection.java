@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-
 public class Connection<RECEIVE extends Packet, SEND extends Packet> {
 
     private ConnectionThread connThread;

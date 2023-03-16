@@ -10,7 +10,7 @@ public class ClientboundHeartbeat implements ClientboundPacket{
     }
 
     @Override
-    public void send(Connection con) {
+    public void send(Connection<ServerboundPacket, ClientboundPacket> con) {
         con.sendPacket(this);
     }
 }
