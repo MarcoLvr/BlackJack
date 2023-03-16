@@ -19,12 +19,10 @@ public class BlackJackGame {
             }
         });
         shuffle();
-        mazzo.forEach(System.out::println);
     }
 
     public void shuffle(){
         double sel = Math.random();
-        System.out.println("Random selezionato: " + (sel > 0.5 ? "1" : "2"));
         if(sel>0.5){
             List<BlackJackCard> copy = new ArrayList<>(mazzo);
             mazzo.clear();

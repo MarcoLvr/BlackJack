@@ -1,7 +1,12 @@
 package me.marcolvr.network;
 
 import lombok.Getter;
+import me.marcolvr.BlackJackServer;
+import me.marcolvr.Main;
+import me.marcolvr.game.player.BlackJackPlayer;
 import me.marcolvr.logger.Logger;
+import me.marcolvr.network.packet.clientbound.ClientboundPacket;
+import me.marcolvr.network.packet.serverbound.ServerboundPacket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,16 +16,16 @@ import java.util.List;
 @Getter
 public class ServerConnection {
 
+    private BlackJackServer blackJackServer;
+
     private ServerSocket socket;
 
     private ServerConnectionThread connectionThread;
 
-    private List<Connection> clients;
-
-    public ServerConnection(int port) {
+    public ServerConnection(int port, BlackJackServer server) {
+        blackJackServer=server;
         try{
             socket=new ServerSocket(port);
-            clients=new ArrayList<>();
             connectionThread=new ServerConnectionThread();
             connectionThread.start();
             Logger.info("Listening on " + port);
@@ -36,7 +41,7 @@ public class ServerConnection {
         public void run(){
             while (null==null){ //si lo so che si scrive while(true) ma c'è tutta una storia dietro a questo
                 try {
-                    clients.add(new Connection(socket.accept()));
+                    blackJackServer.addPlayer(new BlackJackPlayer(new Connection<>(socket.accept())));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

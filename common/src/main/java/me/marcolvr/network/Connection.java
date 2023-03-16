@@ -7,7 +7,6 @@ import me.marcolvr.utils.Pair;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,41 +14,47 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class Connection {
+
+public class Connection<RECEIVE extends Packet, SEND extends Packet> {
 
     private ConnectionThread connThread;
     @Getter
     private PacketHandler handler;
+    @Getter
+    private long lastSentPacket;
 
-    private Map<Byte, List<Consumer<Packet>>> packetActions;
+    private Map<Byte, List<Consumer<RECEIVE>>> packetActions;
 
     public Connection(Socket socket){
         handler=new PacketHandler();
         packetActions=new HashMap<>();
         connThread=new ConnectionThread(socket);
         connThread.start();
+        lastSentPacket=0;
     }
 
-    public void onPacketReceive(byte packetId, Consumer<Packet> action){
-        if(packetActions.containsKey(packetId)) packetActions.put(packetId, new ArrayList<>());
+    public void onPacketReceive(Byte packetId, Consumer<RECEIVE> action){
+        if(!packetActions.containsKey(packetId)) packetActions.put(packetId, new ArrayList<>());
         packetActions.get(packetId).add(action);
     }
 
-    public void clearPacketActions(byte packetId){
+    public void clearPacketActions(Byte packetId){
         packetActions.remove(packetId);
     }
 
 
-    public void sendPacket(Packet p){
+    public boolean sendPacket(SEND p){
         try {
             connThread.send(handler.toByteArray(p));
+            lastSentPacket=System.currentTimeMillis();
+            return true;
         } catch (IOException e) {
-            e.printStackTrace();
+            return false;
         }
     }
 
-    public InetAddress getInetAddress(){
-        return connThread.socket.getInetAddress();
+    public String getAddress(){
+        return connThread.socket.getRemoteSocketAddress().toString();
     }
 
     public void close(){
@@ -65,7 +70,7 @@ public class Connection {
     @Getter
     class ConnectionThread extends Thread{
 
-        private Socket socket;
+        private final Socket socket;
         public ConnectionThread(Socket sock){
             this.socket=sock;
         }
@@ -81,7 +86,7 @@ public class Connection {
                 if(!socket.isConnected() || socket.isClosed()) break;
                 try{
                     if(socket.getInputStream().available()!=0){
-                        Pair<Byte, Packet> data = handler.handle(new ByteArrayInputStream(socket.getInputStream().readNBytes(socket.getInputStream().available())));
+                        Pair<Byte, RECEIVE> data = (Pair<Byte, RECEIVE>) handler.handle(new ByteArrayInputStream(socket.getInputStream().readNBytes(socket.getInputStream().available())));
                         if(packetActions.containsKey(data.getFirst()))
                             packetActions.get(data.getFirst()).forEach(action -> action.accept(data.getSecond()));
                     }
@@ -90,9 +95,7 @@ public class Connection {
                 }
                 try {
                     sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                } catch (InterruptedException ignored) {}
             }
         }
     }
