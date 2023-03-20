@@ -6,11 +6,15 @@ import me.marcolvr.Main;
 import me.marcolvr.game.logic.BlackJackGame;
 import me.marcolvr.game.player.BlackJackPlayer;
 import me.marcolvr.logger.Logger;
+import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BlackJackRoom {
+
+    private final int START_SECONDS = 30;
+    private final int MIN_PLAYERS = 2;
 
     @Getter
     private final String id;
@@ -21,10 +25,15 @@ public class BlackJackRoom {
 
     private BlackJackRoomTicker ticker;
 
+    @Getter
     private int state;
+
+    @Getter
+    private int time;
 
     public BlackJackRoom(String id, BlackJackPlayer creator){
         this.id=id;
+        state=0;
         players=new ArrayList<>();
         logic=new BlackJackGame();
         ticker=new BlackJackRoomTicker();
@@ -44,6 +53,10 @@ public class BlackJackRoom {
         }
         players.add(player);
         Logger.info("[" + id + "] " + player.getUsername() +" joined the room.");
+        if(players.size()==MIN_PLAYERS){
+            time=START_SECONDS;
+            state=1;
+        }
         return true;
     }
 
@@ -54,6 +67,18 @@ public class BlackJackRoom {
     }
 
     private void tick(){
+        if(state==1){
+            if(players.size()<MIN_PLAYERS) {
+                state=0;
+                return;
+            }
+            time--;
+            if(time==0){
+                state=2;
+                return;
+            }
+            players.forEach(player -> player.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, time, players.size())));
+        }
 
     }
 
@@ -61,6 +86,11 @@ public class BlackJackRoom {
 
         @Override
         public void run(){
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             while (!players.isEmpty()){
                 tick();
                 try {

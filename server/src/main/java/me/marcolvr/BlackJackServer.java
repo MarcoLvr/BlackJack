@@ -3,6 +3,7 @@ package me.marcolvr;
 import lombok.Getter;
 import me.marcolvr.game.BlackJackRoom;
 import me.marcolvr.game.player.BlackJackPlayer;
+import me.marcolvr.game.player.PlayerConnection;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.network.HeartbeatTask;
 import me.marcolvr.network.ServerConnection;
@@ -29,15 +30,11 @@ public class BlackJackServer {
         Logger.info("BlackJack Server started!");
     }
 
-    public void addPlayer(BlackJackPlayer player){
-        players.add(player);
-        Logger.info(player.getConnection().getAddress() + " connected");
-    }
-
-    public boolean setPlayerUsername(BlackJackPlayer player, String username){
+    public boolean createBlackJackPlayer(PlayerConnection connection, String username){
         if(players.stream().anyMatch(p -> p.getUsername()!=null && p.getUsername().equalsIgnoreCase(username))) return false;
-        player.setUsername(username);
-        Logger.info(player.getConnection().getAddress() + " username is " + player.getUsername());
+        BlackJackPlayer player = new BlackJackPlayer(connection, username);
+        players.add(player);
+        Logger.info(player.getConnection().getAddress() + " logged in as " + player.getUsername());
         return true;
     }
 

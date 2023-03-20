@@ -2,6 +2,7 @@ package me.marcolvr;
 
 import me.marcolvr.network.Connection;
 import me.marcolvr.network.packet.clientbound.ClientboundACK;
+import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
 import me.marcolvr.network.packet.clientbound.ClientboundNACK;
 import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 import me.marcolvr.network.packet.serverbound.ServerboundPacket;
@@ -19,6 +20,10 @@ public class Main {
         });
         conn.onPacketReceive((byte) 127, (packet)->{
             System.out.println("NACK of " + ((ClientboundNACK) packet).getReferredPacketId());
+        });
+        conn.onPacketReceive((byte) 2, (packet) ->{
+            ClientboundLobbyUpdate p = (ClientboundLobbyUpdate) packet;
+            System.out.println("Lobby update: " + p.isStarting() + " " + p.getStartSeconds() + " " + p.getPlayers());
         });
         conn.sendPacket(new ServerboundUsername("MarcoLvr"));
         Thread.sleep(1000);

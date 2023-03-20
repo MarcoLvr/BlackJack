@@ -4,6 +4,7 @@ import lombok.Getter;
 import me.marcolvr.BlackJackServer;
 import me.marcolvr.Main;
 import me.marcolvr.game.player.BlackJackPlayer;
+import me.marcolvr.game.player.PlayerConnection;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 import me.marcolvr.network.packet.serverbound.ServerboundPacket;
@@ -41,7 +42,7 @@ public class ServerConnection {
         public void run(){
             while (null==null){ //si lo so che si scrive while(true) ma c'è tutta una storia dietro a questo
                 try {
-                    blackJackServer.addPlayer(new BlackJackPlayer(new Connection<>(socket.accept())));
+                    new PlayerConnection(socket.accept());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
