@@ -1,12 +1,8 @@
 package me.marcolvr.network.packet;
 
-import me.marcolvr.network.packet.serverbound.ServerboundACK;
 import me.marcolvr.utils.Pair;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class PacketHandler {
 
