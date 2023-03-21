@@ -1,7 +1,7 @@
-package me.marcolvr.game.logic;
+package me.marcolvr.server.game.logic;
 
-import me.marcolvr.game.logic.card.BlackJackCard;
-import me.marcolvr.game.logic.card.CardSeed;
+import me.marcolvr.server.game.logic.card.BlackJackCard;
+import me.marcolvr.server.game.logic.card.CardSeed;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package me.marcolvr;
+package me.marcolvr.server;
 
 import lombok.Getter;
 

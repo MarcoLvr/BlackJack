@@ -1,12 +1,12 @@
-package me.marcolvr;
+package me.marcolvr.server;
 
 import lombok.Getter;
-import me.marcolvr.game.BlackJackRoom;
-import me.marcolvr.game.player.BlackJackPlayer;
-import me.marcolvr.game.player.PlayerConnection;
+import me.marcolvr.server.game.BlackJackRoom;
+import me.marcolvr.server.network.HeartbeatTask;
+import me.marcolvr.server.network.ServerConnection;
+import me.marcolvr.server.game.player.BlackJackPlayer;
+import me.marcolvr.server.game.player.PlayerConnection;
 import me.marcolvr.logger.Logger;
-import me.marcolvr.network.HeartbeatTask;
-import me.marcolvr.network.ServerConnection;
 
 import java.util.ArrayList;
 import java.util.List;

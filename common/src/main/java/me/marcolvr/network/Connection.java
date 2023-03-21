@@ -82,6 +82,8 @@ public class Connection<R extends Packet, S extends Packet> {
         private final BufferedInputStream inputStream;
         public ConnectionThread(Socket sock) throws IOException {
             this.socket=sock;
+            socket.setSoTimeout(5000);
+            socket.setKeepAlive(true);
             inputStream=new BufferedInputStream(socket.getInputStream());
         }
 

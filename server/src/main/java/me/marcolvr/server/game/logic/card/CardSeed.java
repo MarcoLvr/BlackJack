@@ -1,4 +1,4 @@
-package me.marcolvr.game.logic.card;
+package me.marcolvr.server.game.logic.card;
 
 public enum CardSeed {
     RED_DIAMONDS,

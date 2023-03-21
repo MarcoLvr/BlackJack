@@ -1,10 +1,9 @@
-package me.marcolvr.game.player;
+package me.marcolvr.server.game.player;
 
-import me.marcolvr.Main;
+import me.marcolvr.server.Main;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.network.Connection;
 import me.marcolvr.network.packet.clientbound.ClientboundACK;
-import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
 import me.marcolvr.network.packet.clientbound.ClientboundNACK;
 import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 import me.marcolvr.network.packet.serverbound.ServerboundPacket;

@@ -1,0 +1,107 @@
+package me.marcolvr.client;
+
+import lombok.Getter;
+import me.marcolvr.client.cli.BlackJackCli;
+import me.marcolvr.logger.Logger;
+import me.marcolvr.client.network.ServerConnection;
+import me.marcolvr.network.packet.clientbound.ClientboundACK;
+import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
+import me.marcolvr.network.packet.clientbound.ClientboundNACK;
+import me.marcolvr.network.packet.serverbound.ServerboundRoom;
+import me.marcolvr.network.packet.serverbound.ServerboundUsername;
+
+import java.io.IOException;
+import java.net.Socket;
+
+@Getter
+public class BlackJackClient {
+
+    private String username;
+    private String room;
+    private ServerConnection connection;
+    private final boolean cli;
+    private BlackJackInterface ginterface;
+
+    public BlackJackClient(String host, int port, boolean cli){
+        this.cli=cli;
+        try {
+            connection=new ServerConnection(new Socket(host, port));
+        } catch (IOException e) {
+            Logger.err("Error initializing socket: " + e.getMessage());
+            System.exit(1);
+        }
+        //Register packet callbacks
+        registerCallbacks();
+
+        //starting cli/gui client
+        if(cli){
+            ginterface=new BlackJackCli(this);
+        }
+
+    }
+
+    private void lobbyAction(ClientboundLobbyUpdate packet){
+        if(!packet.isStarting() && packet.getStartSeconds()==0) {
+            System.out.println("In attesa di giocatori. Attualmente " + packet.getPlayers());
+            return;
+        }
+        if(packet.isStarting()){
+            if(packet.getStartSeconds()%10==0 || packet.getStartSeconds()<10){
+                System.out.println("Avvio in " + packet.getStartSeconds());
+            }
+            return;
+        }
+        System.out.println("Avvio annullato");
+    }
+
+    public void offerUsername(String username){
+        if(connection.sendPacket(new ServerboundUsername(username)))
+            this.username=username;
+    }
+
+    public void offerRoom(String room){
+        if(connection.sendPacket(new ServerboundRoom(room)))
+            this.room=room;
+    }
+
+    private void registerCallbacks(){
+        connection.onConnectionError((e)->{
+            Logger.err("An error occurred with Connection. Closing client");
+            System.exit(2);
+        });
+        connection.onPacketReceive((byte) 0, (packet)->{
+            ClientboundACK ack = (ClientboundACK) packet;
+            Logger.info("Received ACK of packet " + ack.getReferredPacketId()); //TODO: togli
+            if(!connection.isLastPackedConfirmed()) return;
+            switch (ack.getReferredPacketId()){
+                case 2 ->{
+                    Logger.info("Username accepted");
+                    ginterface.requestRoom(false);
+                }
+                case 3 ->{
+                    Logger.info("Joined the room");
+                }
+            }
+        });
+        connection.onPacketReceive((byte) 127, (packet)->{
+            ClientboundNACK nack = (ClientboundNACK) packet;
+            Logger.info("Received NACK of packet " + nack.getReferredPacketId()); //TODO: togli
+            if(!connection.isLastPackedConfirmed()) return;
+            switch (nack.getReferredPacketId()){
+                case 2 ->{
+                    Logger.info("Username refused");
+                    ginterface.requestUsername(true);
+                }
+                case 3 ->{
+                    Logger.info("Room unavailable");
+                    ginterface.requestRoom(true);
+                }
+            }
+        });
+        connection.onPacketReceive((byte) 2, (packet) ->{
+            ClientboundLobbyUpdate p = (ClientboundLobbyUpdate) packet;
+            lobbyAction(p);
+        });
+    }
+
+}

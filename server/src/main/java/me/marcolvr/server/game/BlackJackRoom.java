@@ -1,9 +1,9 @@
-package me.marcolvr.game;
+package me.marcolvr.server.game;
 
 import lombok.Getter;
-import me.marcolvr.Main;
-import me.marcolvr.game.logic.BlackJackGame;
-import me.marcolvr.game.player.BlackJackPlayer;
+import me.marcolvr.server.Main;
+import me.marcolvr.server.game.logic.BlackJackGame;
+import me.marcolvr.server.game.player.BlackJackPlayer;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
 
@@ -12,7 +12,7 @@ import java.util.List;
 
 public class BlackJackRoom {
 
-    private final int START_SECONDS = 30;
+    private final int START_SECONDS = 31;
     private final int MIN_PLAYERS = 2;
 
     @Getter
@@ -69,6 +69,10 @@ public class BlackJackRoom {
         if(state==1){
             if(players.size()<MIN_PLAYERS) {
                 state=0;
+                players.forEach(player -> {
+                    player.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, time, players.size()));
+                });
+                time=0;
                 return;
             }
             time--;

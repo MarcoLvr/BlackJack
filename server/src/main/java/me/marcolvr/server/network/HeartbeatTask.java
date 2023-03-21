@@ -1,10 +1,8 @@
-package me.marcolvr.network;
+package me.marcolvr.server.network;
 
-import lombok.AllArgsConstructor;
-import me.marcolvr.BlackJackServer;
-import me.marcolvr.game.player.BlackJackPlayer;
+import me.marcolvr.server.BlackJackServer;
+import me.marcolvr.server.game.player.BlackJackPlayer;
 import me.marcolvr.network.packet.clientbound.ClientboundHeartbeat;
-import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -14,30 +12,27 @@ public class HeartbeatTask extends Thread{
 
     private BlackJackServer server;
 
-    private List<BlackJackPlayer> secondChance;
-
     public HeartbeatTask(BlackJackServer server){
         this.server=server;
-        secondChance=new ArrayList<>();
     }
 
     @Override
     public void run(){
+        List<BlackJackPlayer> toDisconnect = new ArrayList<>();
         while (null==null){
-            Iterator<BlackJackPlayer> iterator = server.getPlayers().stream().iterator();
+            toDisconnect.clear();
+            Iterator<BlackJackPlayer> iterator = server.getPlayers().iterator();
             while (iterator.hasNext()){
                 BlackJackPlayer player = iterator.next();
                 if(System.currentTimeMillis()-player.getConnection().getLastSentPacket()>5000){
                     if(!player.getConnection().sendPacket(new ClientboundHeartbeat())){
-                        if(secondChance.contains(player)){
-                            server.disconnect(player, "Timed out");
-                            secondChance.remove(player);
-                        }else{
-                            secondChance.add(player);
-                        }
+                        toDisconnect.add(player);
                     };
                 }
             }
+            toDisconnect.forEach(blackJackPlayer -> {
+                server.disconnect(blackJackPlayer, "Timed out");
+            });
             try {
                 sleep(5000);
             } catch (InterruptedException e) {

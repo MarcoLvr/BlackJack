@@ -1,9 +1,9 @@
-package me.marcolvr.game.player;
+package me.marcolvr.server.game.player;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.marcolvr.Main;
-import me.marcolvr.game.BlackJackRoom;
+import me.marcolvr.server.Main;
+import me.marcolvr.server.game.BlackJackRoom;
 import me.marcolvr.network.packet.clientbound.ClientboundACK;
 import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
 import me.marcolvr.network.packet.clientbound.ClientboundNACK;

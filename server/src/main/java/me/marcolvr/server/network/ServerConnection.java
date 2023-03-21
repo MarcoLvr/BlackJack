@@ -1,18 +1,12 @@
-package me.marcolvr.network;
+package me.marcolvr.server.network;
 
 import lombok.Getter;
-import me.marcolvr.BlackJackServer;
-import me.marcolvr.Main;
-import me.marcolvr.game.player.BlackJackPlayer;
-import me.marcolvr.game.player.PlayerConnection;
+import me.marcolvr.server.BlackJackServer;
+import me.marcolvr.server.game.player.PlayerConnection;
 import me.marcolvr.logger.Logger;
-import me.marcolvr.network.packet.clientbound.ClientboundPacket;
-import me.marcolvr.network.packet.serverbound.ServerboundPacket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 public class ServerConnection {
