@@ -18,8 +18,4 @@ public class ServerboundNACK implements ServerboundPacket{
         return 0x7F; //127
     }
 
-    @Override
-    public void send(Connection<ClientboundPacket, ServerboundPacket> con) {
-        con.sendPacket(this);
-    }
 }

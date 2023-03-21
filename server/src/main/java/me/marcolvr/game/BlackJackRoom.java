@@ -1,7 +1,6 @@
 package me.marcolvr.game;
 
 import lombok.Getter;
-import me.marcolvr.BlackJackServer;
 import me.marcolvr.Main;
 import me.marcolvr.game.logic.BlackJackGame;
 import me.marcolvr.game.player.BlackJackPlayer;

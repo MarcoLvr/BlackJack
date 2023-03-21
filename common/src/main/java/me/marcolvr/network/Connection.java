@@ -5,16 +5,15 @@ import me.marcolvr.network.packet.Packet;
 import me.marcolvr.network.packet.PacketHandler;
 import me.marcolvr.utils.Pair;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.security.InvalidParameterException;
+import java.util.*;
 import java.util.function.Consumer;
 
-public class Connection<RECEIVE extends Packet, SEND extends Packet> {
+public class Connection<R extends Packet, S extends Packet> {
 
     private ConnectionThread connThread;
     @Getter
@@ -22,19 +21,29 @@ public class Connection<RECEIVE extends Packet, SEND extends Packet> {
     @Getter
     private long lastSentPacket;
 
-    private Map<Byte, List<Consumer<RECEIVE>>> packetActions;
+    private Map<Byte, List<Consumer<R>>> packetActions;
+
+    private Consumer<Exception> errorAction;
 
     public Connection(Socket socket){
         handler=new PacketHandler();
         packetActions=new HashMap<>();
-        connThread=new ConnectionThread(socket);
-        connThread.start();
+        try{
+            connThread=new ConnectionThread(socket);
+            connThread.start();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         lastSentPacket=0;
     }
 
-    public void onPacketReceive(Byte packetId, Consumer<RECEIVE> action){
+    public void onPacketReceive(Byte packetId, Consumer<R> action){
         if(!packetActions.containsKey(packetId)) packetActions.put(packetId, new ArrayList<>());
         packetActions.get(packetId).add(action);
+    }
+
+    public void onConnectionError(Consumer<Exception> action){
+        errorAction=action;
     }
 
     public void clearPacketActions(Byte packetId){
@@ -42,7 +51,7 @@ public class Connection<RECEIVE extends Packet, SEND extends Packet> {
     }
 
 
-    public boolean sendPacket(SEND p){
+    public boolean sendPacket(S p){
         try {
             connThread.send(handler.toByteArray(p));
             lastSentPacket=System.currentTimeMillis();
@@ -70,8 +79,10 @@ public class Connection<RECEIVE extends Packet, SEND extends Packet> {
     class ConnectionThread extends Thread{
 
         private final Socket socket;
-        public ConnectionThread(Socket sock){
+        private final BufferedInputStream inputStream;
+        public ConnectionThread(Socket sock) throws IOException {
             this.socket=sock;
+            inputStream=new BufferedInputStream(socket.getInputStream());
         }
 
         public void send(byte[] data) throws IOException {
@@ -79,18 +90,18 @@ public class Connection<RECEIVE extends Packet, SEND extends Packet> {
         }
 
 
+
         @Override
         public void run(){
-            while (null==null){
-                if(!socket.isConnected() || socket.isClosed()) break;
+            while (socket.isConnected() && !socket.isClosed()){
                 try{
-                    if(socket.getInputStream().available()!=0){
-                        Pair<Byte, RECEIVE> data = (Pair<Byte, RECEIVE>) handler.handle(new ByteArrayInputStream(socket.getInputStream().readNBytes(socket.getInputStream().available())));
+                    if(inputStream.available()!=0){
+                        Pair<Byte, R> data = (Pair<Byte, R>) handler.handle(new ByteArrayInputStream(inputStream.readNBytes(inputStream.available())));
                         if(packetActions.containsKey(data.getFirst()))
                             packetActions.get(data.getFirst()).forEach(action -> action.accept(data.getSecond()));
                     }
                 }catch (IOException | ClassNotFoundException e){
-                    e.printStackTrace();
+                    if(errorAction!=null) errorAction.accept(e);
                 }
                 try {
                     sleep(1);

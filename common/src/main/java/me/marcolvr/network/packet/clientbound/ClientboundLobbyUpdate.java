@@ -16,9 +16,4 @@ public class ClientboundLobbyUpdate implements ClientboundPacket {
     public byte getId() {
         return 0x02; //1
     }
-
-    @Override
-    public void send(Connection<ServerboundPacket, ClientboundPacket> con) {
-        con.sendPacket(this);
-    }
 }

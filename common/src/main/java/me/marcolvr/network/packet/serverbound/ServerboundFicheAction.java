@@ -9,8 +9,4 @@ public class ServerboundFicheAction implements ServerboundPacket{
         return 0x05; //5
     }
 
-    @Override
-    public void send(Connection<ClientboundPacket, ServerboundPacket> con) {
-        con.sendPacket(this);
-    }
 }

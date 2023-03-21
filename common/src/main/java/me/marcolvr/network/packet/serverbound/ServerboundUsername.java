@@ -17,8 +17,4 @@ public class ServerboundUsername implements ServerboundPacket {
         return 0x02; //2
     }
 
-    @Override
-    public void send(Connection<ClientboundPacket, ServerboundPacket> con) {
-        con.sendPacket(this);
-    }
 }

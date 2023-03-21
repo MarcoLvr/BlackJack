@@ -9,8 +9,4 @@ public class ClientboundHeartbeat implements ClientboundPacket{
         return 0x01; //1
     }
 
-    @Override
-    public void send(Connection<ServerboundPacket, ClientboundPacket> con) {
-        con.sendPacket(this);
-    }
 }

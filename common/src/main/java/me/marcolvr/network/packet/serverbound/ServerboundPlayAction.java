@@ -9,8 +9,4 @@ public class ServerboundPlayAction implements ServerboundPacket{
         return 0x04; //4
     }
 
-    @Override
-    public void send(Connection<ClientboundPacket, ServerboundPacket> con) {
-        con.sendPacket(this);
-    }
 }

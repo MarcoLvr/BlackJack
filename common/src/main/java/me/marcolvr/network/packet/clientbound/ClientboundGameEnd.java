@@ -3,13 +3,13 @@ package me.marcolvr.network.packet.clientbound;
 import lombok.Getter;
 
 @Getter
-public class ClientboundGameUpdate implements ClientboundPacket {
+public class ClientboundGameEnd implements ClientboundPacket {
 
 
-    private String selection;
+    private String winner;
     @Override
     public byte getId() {
-        return 0x04; //4
+        return 0x06; //6
     }
 
 }

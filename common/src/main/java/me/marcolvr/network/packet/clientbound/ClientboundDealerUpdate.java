@@ -5,16 +5,14 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ClientboundPlayerUpdate implements ClientboundPacket {
+public class ClientboundDealerUpdate implements ClientboundPacket {
 
-    private String username;
-    private int fiches;
     private int cardsValue;
     private int cards;
 
     @Override
     public byte getId() {
-        return 0x03; //3
+        return 0x05; //5
     }
 
 }

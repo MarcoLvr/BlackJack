@@ -18,8 +18,4 @@ public class ServerboundACK implements ServerboundPacket{
         return 0x00; //0
     }
 
-    @Override
-    public void send(Connection<ClientboundPacket, ServerboundPacket> con) {
-        con.sendPacket(this);
-    }
 }

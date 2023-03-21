@@ -18,8 +18,4 @@ public class ClientboundNACK implements ClientboundPacket{
         return 0x7F; //127
     }
 
-    @Override
-    public void send(Connection<ServerboundPacket, ClientboundPacket> con) {
-        con.sendPacket(this);
-    }
 }

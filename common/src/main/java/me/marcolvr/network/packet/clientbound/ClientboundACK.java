@@ -17,8 +17,4 @@ public class ClientboundACK implements ClientboundPacket {
         return 0x00; //0
     }
 
-    @Override
-    public void send(Connection<ServerboundPacket, ClientboundPacket> con) {
-        con.sendPacket(this);
-    }
 }
