@@ -52,6 +52,8 @@ public class BlackJackRoom {
             Logger.info("[" + id + "] " + player.getUsername() +" tried to join room but at the moment it isn't accessible.");
             return false;
         }
+        players.forEach(p ->
+                p.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, 0, players.size()+1)));
         players.add(player);
         Logger.info("[" + id + "] " + player.getUsername() +" joined the room.");
         if(players.size()==MIN_PLAYERS){
@@ -63,6 +65,8 @@ public class BlackJackRoom {
 
     public boolean removePlayer(BlackJackPlayer player){
         boolean res = players.remove(player);
+        players.forEach(p ->
+                p.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, 0, players.size())));
         if(res) Logger.info("[" + id + "] " + player.getUsername() +" left the room.");
         return res;
     }

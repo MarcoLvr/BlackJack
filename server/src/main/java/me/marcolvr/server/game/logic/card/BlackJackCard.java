@@ -5,12 +5,14 @@ import lombok.Getter;
 
 @Getter
 public class BlackJackCard {
-    private CardSeed seed;
-    private int value;
+    private final CardSeed seed;
+    private final int value;
 
     private final String name;
 
     public BlackJackCard(CardSeed seed, int value){
+        this.seed=seed;
+        this.value=value;
         StringBuilder generatedName = new StringBuilder();
         switch (value){
             case 1 -> generatedName.append("Asso di ");

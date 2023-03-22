@@ -106,6 +106,7 @@ public class BlackJackClient {
                 case 0 ->{
                     Logger.info("Game started");
                     System.out.println("Si inizia!");
+                    System.out.println("Giocatori:");
                     ginterface.requestFiches(false);
                 }
                 case 1->{
@@ -117,7 +118,8 @@ public class BlackJackClient {
         });
         connection.onPacketReceive((byte) 3, (packet) ->{
             ClientboundPlayerUpdate p = (ClientboundPlayerUpdate) packet;
-            Logger.info("Player update: " + p.getUsername() + " fiches: " +p.getFiches() + " totalCards: " + p.getCards() + " newCardValue: " + p.getCardsValue());
+            System.out.println(p.getUsername() + ": Ha " + p.getFiches() + " fiches!");
+            Logger.info("Player update: " + p.getUsername() + " fiches: " +p.getFiches() + " totalCards: " + p.getCards() + " cardsValue: " + p.getCardsValue());
         });
 
     }
