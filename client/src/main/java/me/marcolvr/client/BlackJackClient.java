@@ -118,7 +118,7 @@ public class BlackJackClient {
         });
         connection.onPacketReceive((byte) 3, (packet) ->{
             ClientboundPlayerUpdate p = (ClientboundPlayerUpdate) packet;
-            System.out.println(p.getUsername() + ": Ha " + p.getFiches() + " fiches!");
+            System.out.println(p.getUsername() + ": Ha " + p.getFiches() + " fiches e ha " + p.getCards() + " con valore totale di " + p.getCardsValue());
             Logger.info("Player update: " + p.getUsername() + " fiches: " +p.getFiches() + " totalCards: " + p.getCards() + " cardsValue: " + p.getCardsValue());
         });
 

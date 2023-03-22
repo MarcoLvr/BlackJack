@@ -98,6 +98,7 @@ public class BlackJackRoom {
                         }
                     }
                 });
+                //TODO: carte da mescolare e da dare
                 players.forEach(player ->
                         players.forEach(pts ->
                                 pts.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), -1,0))));
