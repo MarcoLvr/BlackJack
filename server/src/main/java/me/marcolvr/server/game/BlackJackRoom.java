@@ -1,6 +1,8 @@
 package me.marcolvr.server.game;
 
 import lombok.Getter;
+import me.marcolvr.network.packet.clientbound.ClientboundGameUpdate;
+import me.marcolvr.network.packet.clientbound.ClientboundPlayerUpdate;
 import me.marcolvr.server.Main;
 import me.marcolvr.server.game.logic.BlackJackGame;
 import me.marcolvr.server.game.player.BlackJackPlayer;
@@ -65,7 +67,7 @@ public class BlackJackRoom {
         return res;
     }
 
-    private void tick(){
+    private void tick() throws InterruptedException {
         if(state==1){
             if(players.size()<MIN_PLAYERS) {
                 state=0;
@@ -78,6 +80,22 @@ public class BlackJackRoom {
             time--;
             if(time==0){
                 state=2;
+                players.forEach(player -> {
+                    player.allowTransactions(false);
+                    player.getConnection().sendPacket(new ClientboundGameUpdate(0, null));
+                });
+                Thread.sleep(10000);
+                players.forEach(player -> {
+                    player.getConnection().sendPacket(new ClientboundGameUpdate(1, null));
+                    if(!player.isLastTransactionFromClient() || player.getLastTransaction()>=0){
+                        int fiches = player.makeFichesTransaction(2000, false,false);
+                        if(fiches==-1) {
+                            fiches = player.makeFichesTransaction(player.getFiches(), false, false);
+                        }
+                    }
+                    player.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), -1,0));
+                });
+                Thread.sleep(1);
                 return;
             }
             players.forEach(player -> player.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, time, players.size())));
@@ -95,8 +113,8 @@ public class BlackJackRoom {
                 e.printStackTrace();
             }
             while (!players.isEmpty()){
-                tick();
                 try {
+                    tick();
                     sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();

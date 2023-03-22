@@ -4,9 +4,7 @@ import lombok.Getter;
 import me.marcolvr.client.cli.BlackJackCli;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.client.network.ServerConnection;
-import me.marcolvr.network.packet.clientbound.ClientboundACK;
-import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
-import me.marcolvr.network.packet.clientbound.ClientboundNACK;
+import me.marcolvr.network.packet.clientbound.*;
 import me.marcolvr.network.packet.serverbound.ServerboundRoom;
 import me.marcolvr.network.packet.serverbound.ServerboundUsername;
 
@@ -102,6 +100,26 @@ public class BlackJackClient {
             ClientboundLobbyUpdate p = (ClientboundLobbyUpdate) packet;
             lobbyAction(p);
         });
+        connection.onPacketReceive((byte) 4, (packet) ->{
+            ClientboundGameUpdate p = (ClientboundGameUpdate) packet;
+            switch (p.getState()){
+                case 0 ->{
+                    Logger.info("Game started");
+                    System.out.println("Si inizia!");
+                    ginterface.requestFiches(false);
+                }
+                case 1->{
+                    if(ginterface.isWaitingForInput()){
+                        ginterface.requestFiches(true);
+                    }
+                }
+            }
+        });
+        connection.onPacketReceive((byte) 3, (packet) ->{
+            ClientboundPlayerUpdate p = (ClientboundPlayerUpdate) packet;
+            Logger.info("Player update: " + p.getUsername() + " fiches: " +p.getFiches() + " totalCards: " + p.getCards() + " newCardValue: " + p.getCardsValue());
+        });
+
     }
 
 }

@@ -2,6 +2,7 @@ package me.marcolvr.server.game.player;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.marcolvr.network.packet.serverbound.ServerboundFicheAction;
 import me.marcolvr.server.Main;
 import me.marcolvr.server.game.BlackJackRoom;
 import me.marcolvr.network.packet.clientbound.ClientboundACK;
@@ -22,6 +23,10 @@ public class BlackJackPlayer {
     public BlackJackPlayer(PlayerConnection connection, String username){
         this.connection = connection;
         this.username=username;
+        fiches=10000;
+        lastTransactionFromClient=false;
+
+        cards=new ArrayList<>();
         connection.onConnectionError((e)->{
             Main.getBlackJackServer().disconnect(this, "Connection Error: " + e.getMessage());
         });
@@ -32,6 +37,30 @@ public class BlackJackPlayer {
                 connection.sendPacket(new ClientboundACK((byte) 0x03));
                 connection.sendPacket(new ClientboundLobbyUpdate(room.getState()==1, room.getTime(), room.getPlayers().size()));
             }
+        });
+        connection.onPacketReceive((byte) 5, (packet)->{
+            ServerboundFicheAction action = (ServerboundFicheAction) packet;
+            if(allowClientTransactions==0 || action.getFiches()==0) {
+                connection.sendPacket(new ClientboundNACK((byte) 0x05));
+                return;
+            }
+            if(action.getFiches()>0){
+                if(allowClientTransactions!=1){
+                    connection.sendPacket(new ClientboundNACK((byte) 0x05));
+                    return;
+                }
+            }
+            if(action.getFiches()<0){
+                if(allowClientTransactions!=-1 || fiches+action.getFiches()<0){
+                    connection.sendPacket(new ClientboundNACK((byte) 0x05));
+                    return;
+                }
+            }
+            fiches+=action.getFiches();
+            lastTransactionFromClient=true;
+            lastTransaction=action.getFiches();
+            allowClientTransactions=0;
+            connection.sendPacket(new ClientboundACK((byte) 0x05));
         });
 
     }
