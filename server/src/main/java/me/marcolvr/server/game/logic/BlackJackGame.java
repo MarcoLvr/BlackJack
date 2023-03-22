@@ -1,18 +1,17 @@
 package me.marcolvr.server.game.logic;
 
+import lombok.Getter;
 import me.marcolvr.server.game.logic.card.BlackJackCard;
 import me.marcolvr.server.game.logic.card.CardSeed;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
+@Getter
 public class BlackJackGame {
-    private List<BlackJackCard> mazzo;
+    private Stack<BlackJackCard> mazzo;
 
     public BlackJackGame(){
-        mazzo=new ArrayList<>();
+        mazzo=new Stack<>();
         Arrays.stream(CardSeed.values()).toList().forEach(value ->{
             for (int i = 1; i <= 13; i++) {
                 mazzo.add(new BlackJackCard(value, i));
@@ -39,6 +38,8 @@ public class BlackJackGame {
             }
         }
     }
+
+
 
     @Override
     public String toString() {

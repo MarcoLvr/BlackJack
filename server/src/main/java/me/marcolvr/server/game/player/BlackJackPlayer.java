@@ -9,6 +9,10 @@ import me.marcolvr.network.packet.clientbound.ClientboundACK;
 import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
 import me.marcolvr.network.packet.clientbound.ClientboundNACK;
 import me.marcolvr.network.packet.serverbound.ServerboundRoom;
+import me.marcolvr.server.game.logic.card.BlackJackCard;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -19,6 +23,9 @@ public class BlackJackPlayer {
     private BlackJackRoom room;
     private int fiches;
     private int lastTransaction;
+    private boolean lastTransactionFromClient;
+    private int allowClientTransactions;
+    private List<BlackJackCard> cards;
 
     public BlackJackPlayer(PlayerConnection connection, String username){
         this.connection = connection;
@@ -63,6 +70,24 @@ public class BlackJackPlayer {
             connection.sendPacket(new ClientboundACK((byte) 0x05));
         });
 
+    }
+
+    public void allowTransactions(boolean add){
+        allowClientTransactions=add ? 1 : -1;
+    }
+
+    public int makeFichesTransaction(int qt, boolean add, boolean fromClient){
+        qt=Math.abs(qt);
+        if(add){
+            fiches+=qt;
+            lastTransaction=qt;
+        }else{
+            if(fiches-qt<0) return -1;
+            fiches-=qt;
+            lastTransaction=qt*-1;
+        }
+        lastTransactionFromClient=fromClient;
+        return fiches;
     }
 
     @Override
