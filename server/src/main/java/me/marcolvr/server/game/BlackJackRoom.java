@@ -90,12 +90,16 @@ public class BlackJackRoom {
                     if(!player.isLastTransactionFromClient() || player.getLastTransaction()>=0){
                         int fiches = player.makeFichesTransaction(2000, false,false);
                         if(fiches==-1) {
-                            fiches = player.makeFichesTransaction(player.getFiches(), false, false);
+                            player.makeFichesTransaction(player.getFiches(), false, false);
                         }
                     }
+                });
+                Thread.sleep(1);
+                players.forEach(player -> {
                     player.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), -1,0));
                 });
                 Thread.sleep(1);
+                state=3;
                 return;
             }
             players.forEach(player -> player.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, time, players.size())));

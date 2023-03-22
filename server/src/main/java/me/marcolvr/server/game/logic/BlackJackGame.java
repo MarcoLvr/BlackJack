@@ -10,6 +10,8 @@ import java.util.*;
 public class BlackJackGame {
     private Stack<BlackJackCard> mazzo;
 
+    private BlackJackDealer dealer;
+
     public BlackJackGame(){
         mazzo=new Stack<>();
         Arrays.stream(CardSeed.values()).toList().forEach(value ->{
@@ -18,6 +20,18 @@ public class BlackJackGame {
             }
         });
         shuffle();
+    }
+
+    public void init(){
+        shuffle();
+    }
+
+    public List<BlackJackCard> addPlayerCards() {
+        List<BlackJackCard> cardsSelected = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            cardsSelected.add(mazzo.pop());
+        }
+        return cardsSelected;
     }
 
     public void shuffle(){
