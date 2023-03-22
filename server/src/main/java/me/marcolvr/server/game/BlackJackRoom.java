@@ -94,18 +94,9 @@ public class BlackJackRoom {
                         }
                     }
                 });
-                Thread.sleep(1);
-                for(BlackJackPlayer player : players){
-                    players.forEach(pts ->{
-                        pts.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), -1,0));
-                    });
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                Thread.sleep(1);
+                players.forEach(player ->
+                        players.forEach(pts ->
+                                pts.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), -1,0))));
                 state=3;
                 return;
             }

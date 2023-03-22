@@ -7,8 +7,10 @@ import me.marcolvr.utils.Pair;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.function.Consumer;
@@ -54,7 +56,6 @@ public class Connection<R extends Packet, S extends Packet> {
     public boolean sendPacket(S p){
         try {
             connThread.send(handler.toByteArray(p));
-            lastSentPacket=System.currentTimeMillis();
             return true;
         } catch (IOException e) {
             return false;
@@ -88,7 +89,11 @@ public class Connection<R extends Packet, S extends Packet> {
         }
 
         public void send(byte[] data) throws IOException {
-            socket.getOutputStream().write(data);
+            ByteBuffer buf = ByteBuffer.allocate(4+data.length);
+            buf.putInt(data.length);
+            buf.put(data);
+            socket.getOutputStream().write(buf.array());
+            lastSentPacket=System.currentTimeMillis();
         }
 
 
@@ -98,7 +103,10 @@ public class Connection<R extends Packet, S extends Packet> {
             while (socket.isConnected() && !socket.isClosed()){
                 try{
                     if(inputStream.available()!=0){
-                        Pair<Byte, R> data = (Pair<Byte, R>) handler.handle(new ByteArrayInputStream(inputStream.readNBytes(inputStream.available())));
+                        byte[] length = inputStream.readNBytes(4);
+                        ByteBuffer buf = ByteBuffer.wrap(length);
+                        int len = buf.getInt();
+                        Pair<Byte, R> data = (Pair<Byte, R>) handler.handle(new ByteArrayInputStream(inputStream.readNBytes(len)));
                         if(packetActions.containsKey(data.getFirst()))
                             packetActions.get(data.getFirst()).forEach(action -> action.accept(data.getSecond()));
                     }
