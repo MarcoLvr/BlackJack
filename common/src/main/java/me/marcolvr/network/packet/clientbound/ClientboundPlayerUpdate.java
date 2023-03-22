@@ -3,6 +3,8 @@ package me.marcolvr.network.packet.clientbound;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @AllArgsConstructor
 public class ClientboundPlayerUpdate implements ClientboundPacket {
@@ -16,5 +18,4 @@ public class ClientboundPlayerUpdate implements ClientboundPacket {
     public byte getId() {
         return 0x03; //3
     }
-
 }

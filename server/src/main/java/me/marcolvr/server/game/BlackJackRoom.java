@@ -14,7 +14,7 @@ import java.util.List;
 
 public class BlackJackRoom {
 
-    private final int START_SECONDS = 31;
+    private final int START_SECONDS = 5;
     private final int MIN_PLAYERS = 2;
 
     @Getter
@@ -95,9 +95,16 @@ public class BlackJackRoom {
                     }
                 });
                 Thread.sleep(1);
-                players.forEach(player -> {
-                    player.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), -1,0));
-                });
+                for(BlackJackPlayer player : players){
+                    players.forEach(pts ->{
+                        pts.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), -1,0));
+                    });
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 Thread.sleep(1);
                 state=3;
                 return;
