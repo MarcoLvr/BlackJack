@@ -20,6 +20,10 @@ public class BlackJackGame {
             }
         });
         shuffle();
+        dealer.reset();
+        Pair<BlackJackCard, BlackJackCard> dealerCards = givePlayerStartCards();
+        dealer.addCard(dealerCards.getFirst());
+        dealer.addCard(dealerCards.getSecond());
     }
 
     public void init(){

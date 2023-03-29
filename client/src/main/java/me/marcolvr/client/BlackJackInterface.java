@@ -9,4 +9,6 @@ public interface BlackJackInterface {
     void requestFiches(boolean cancel);
 
     boolean isWaitingForInput();
+
+    void requestAction();
 }

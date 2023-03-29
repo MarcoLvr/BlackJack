@@ -1,10 +1,12 @@
 package me.marcolvr.client;
 
 import lombok.Getter;
+import lombok.extern.java.Log;
 import me.marcolvr.client.cli.BlackJackCli;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.client.network.ServerConnection;
 import me.marcolvr.network.packet.clientbound.*;
+import me.marcolvr.network.packet.serverbound.ServerboundPlayAction;
 import me.marcolvr.network.packet.serverbound.ServerboundRoom;
 import me.marcolvr.network.packet.serverbound.ServerboundUsername;
 
@@ -121,7 +123,37 @@ public class BlackJackClient {
             System.out.println(p.getUsername() + ": Ha " + p.getFiches() + " fiches e ha " + p.getCards() + " con valore totale di " + p.getCardsValue());
             Logger.info("Player update: " + p.getUsername() + " fiches: " +p.getFiches() + " totalCards: " + p.getCards() + " cardsValue: " + p.getCardsValue());
         });
+        connection.onPacketReceive((byte) 4, (packet) ->{
+            ClientboundGameUpdate p = (ClientboundGameUpdate) packet;
+            Logger.info("Game update: " + p.getSelection() + " " + p.getState());
+            switch (p.getState()){
+                case 3 ->{
+                    if(p.getSelection().equals(username)){
+                        ginterface.requestAction();
+                    }
+                }
+            }
+        });
+
+        connection.onPacketReceive((byte) 6, (packet)->{
+            ClientboundGameEnd end = (ClientboundGameEnd) packet;
+            switch (end.getState()){
+                case 0 ->{
+                    System.out.println("Hai perso! Hai superato 21");
+                }
+                case 1 ->{
+                    System.out.println("Hai pareggiato col banco!");
+                }
+                case 2 ->{
+                    System.out.println("Hai vinto! Il banco ha un valore più basso!");
+                }
+            }
+        });
 
     }
 
+    public void offerAction(String action){
+        connection.sendPacket(new ServerboundPlayAction(action.equals("1")));
+
+    }
 }

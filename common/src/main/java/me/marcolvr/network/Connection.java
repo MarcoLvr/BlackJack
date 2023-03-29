@@ -39,6 +39,10 @@ public class Connection<R extends Packet, S extends Packet> {
         lastSentPacket=0;
     }
 
+    public boolean isClosed(){
+        return connThread.socket.isClosed() || !connThread.socket.isConnected();
+    }
+
     public void onPacketReceive(Byte packetId, Consumer<R> action){
         if(!packetActions.containsKey(packetId)) packetActions.put(packetId, new ArrayList<>());
         packetActions.get(packetId).add(action);

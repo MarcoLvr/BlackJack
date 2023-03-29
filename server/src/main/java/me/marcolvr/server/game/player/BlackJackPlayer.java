@@ -3,6 +3,7 @@ package me.marcolvr.server.game.player;
 import lombok.Getter;
 import lombok.Setter;
 import me.marcolvr.network.packet.serverbound.ServerboundFicheAction;
+import me.marcolvr.network.packet.serverbound.ServerboundPlayAction;
 import me.marcolvr.server.Main;
 import me.marcolvr.server.game.BlackJackRoom;
 import me.marcolvr.network.packet.clientbound.ClientboundACK;
@@ -69,7 +70,28 @@ public class BlackJackPlayer {
             allowClientTransactions=0;
             connection.sendPacket(new ClientboundACK((byte) 0x05));
         });
+        connection.onPacketReceive((byte) 4, (packet) ->{
+            ServerboundPlayAction action = (ServerboundPlayAction) packet;
+            if(room==null) {
+                connection.sendPacket(new ClientboundNACK((byte) 0x04));
+                return;
+            }
+            room.rotationAction(this, action.isAddCard());
+            connection.sendPacket(new ClientboundACK((byte) 0x04));
+        });
 
+    }
+
+    public int getCardsValue(){
+        int val = 0;
+        for (BlackJackCard card : cards) {
+            val+=card.getValue();
+        }
+        return val;
+    }
+
+    public boolean isOnline(){
+        return !connection.isClosed();
     }
 
     public void allowTransactions(boolean add){

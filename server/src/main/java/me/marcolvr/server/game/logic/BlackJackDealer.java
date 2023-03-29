@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+@Getter
 public class BlackJackDealer {
     private List<BlackJackCard> carte;
 

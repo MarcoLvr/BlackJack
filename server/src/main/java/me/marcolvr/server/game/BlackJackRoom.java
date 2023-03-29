@@ -1,16 +1,21 @@
 package me.marcolvr.server.game;
 
 import lombok.Getter;
+import me.marcolvr.network.packet.clientbound.ClientboundGameEnd;
 import me.marcolvr.network.packet.clientbound.ClientboundGameUpdate;
 import me.marcolvr.network.packet.clientbound.ClientboundPlayerUpdate;
 import me.marcolvr.server.Main;
+import me.marcolvr.server.game.logic.BlackJackDealer;
 import me.marcolvr.server.game.logic.BlackJackGame;
+import me.marcolvr.server.game.logic.card.BlackJackCard;
 import me.marcolvr.server.game.player.BlackJackPlayer;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.network.packet.clientbound.ClientboundLobbyUpdate;
+import me.marcolvr.utils.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class BlackJackRoom {
 
@@ -32,6 +37,10 @@ public class BlackJackRoom {
     @Getter
     private int time;
 
+    private Stack<BlackJackPlayer> rotation;
+
+    private BlackJackPlayer currentRotating;
+
     public BlackJackRoom(String id, BlackJackPlayer creator){
         this.id=id;
         state=0;
@@ -52,8 +61,6 @@ public class BlackJackRoom {
             Logger.info("[" + id + "] " + player.getUsername() +" tried to join room but at the moment it isn't accessible.");
             return false;
         }
-        players.forEach(p ->
-                p.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, 0, players.size()+1)));
         players.add(player);
         Logger.info("[" + id + "] " + player.getUsername() +" joined the room.");
         if(players.size()==MIN_PLAYERS){
@@ -65,8 +72,6 @@ public class BlackJackRoom {
 
     public boolean removePlayer(BlackJackPlayer player){
         boolean res = players.remove(player);
-        players.forEach(p ->
-                p.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, 0, players.size())));
         if(res) Logger.info("[" + id + "] " + player.getUsername() +" left the room.");
         return res;
     }
@@ -84,30 +89,111 @@ public class BlackJackRoom {
             time--;
             if(time==0){
                 state=2;
-                players.forEach(player -> {
-                    player.allowTransactions(false);
-                    player.getConnection().sendPacket(new ClientboundGameUpdate(0, null));
-                });
-                Thread.sleep(10000);
-                players.forEach(player -> {
-                    player.getConnection().sendPacket(new ClientboundGameUpdate(1, null));
-                    if(!player.isLastTransactionFromClient() || player.getLastTransaction()>=0){
-                        int fiches = player.makeFichesTransaction(2000, false,false);
-                        if(fiches==-1) {
-                            player.makeFichesTransaction(player.getFiches(), false, false);
-                        }
-                    }
-                });
-                //TODO: carte da mescolare e da dare
-                players.forEach(player ->
-                        players.forEach(pts ->
-                                pts.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), -1,0))));
-                state=3;
+                startRound();
                 return;
             }
             players.forEach(player -> player.getConnection().sendPacket(new ClientboundLobbyUpdate(state==1, time, players.size())));
         }
 
+    }
+
+    public void rotationNext(){
+        if(rotation.isEmpty()){
+            BlackJackDealer dealer = logic.getDealer();
+            if(dealer.getCardsValue()<14){
+                dealer.addCard(logic.givePlayerRandomCard());
+            }
+            players.forEach(player -> {
+                if(player.getCardsValue()>21) return;
+                if(dealer.getCardsValue()>21 || player.getCardsValue()>dealer.getCardsValue()){
+                    player.getConnection().sendPacket(new ClientboundGameEnd(2));
+                    player.setFiches(Math.abs(player.getLastTransaction())*2);
+                }
+                if(player.getCardsValue()==dealer.getCardsValue()){
+                    player.getConnection().sendPacket(new ClientboundGameEnd(1));
+                    player.setFiches(Math.abs(player.getLastTransaction())*2);
+                }
+
+            });
+            try {
+                Thread.sleep(5000);
+                startRound();
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            return;
+        }
+        currentRotating = rotation.pop();
+        if(!currentRotating.isOnline()){
+            players.forEach(pts ->{
+                pts.getConnection().sendPacket(new ClientboundPlayerUpdate(currentRotating.getUsername(), -1, 0,0));
+            });
+            rotationNext();
+            return;
+        }
+        players.forEach(pts ->{
+            pts.getConnection().sendPacket(new ClientboundGameUpdate(state, currentRotating.getUsername()));
+        });
+    }
+
+    public void rotationAction(BlackJackPlayer player, boolean addCard){
+        if(!currentRotating.equals(player)) return;
+        if(addCard){
+            player.getCards().add(logic.givePlayerRandomCard());
+        }
+        players.forEach(pts ->{
+            pts.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), player.getCardsValue(),player.getCards().size()));
+        });
+        if(player.getCardsValue()>21){
+            player.getConnection().sendPacket(new ClientboundGameEnd(0));
+        }else{
+            if(addCard){
+                players.forEach(pts ->{
+                    pts.getConnection().sendPacket(new ClientboundGameUpdate(state, currentRotating.getUsername()));
+                });
+                rotation.add(rotation.size(), player);
+            }
+        }
+        rotationNext();
+    }
+
+    public void startRound() throws InterruptedException {
+        logic.init();
+        rotation=new Stack<>();
+        rotation.addAll(players);
+
+        //
+        players.forEach(player -> {
+            player.allowTransactions(false);
+            player.getConnection().sendPacket(new ClientboundGameUpdate(0, null));
+        });
+        Thread.sleep(10000);
+        players.forEach(player -> {
+            player.getConnection().sendPacket(new ClientboundGameUpdate(1, null));
+            if(!player.isLastTransactionFromClient() || player.getLastTransaction()>=0){
+                int fiches = player.makeFichesTransaction(2000, false,false);
+                if(fiches==-1) {
+                    player.makeFichesTransaction(player.getFiches(), false, false);
+                }
+            }
+        });
+        Thread.sleep(1);
+        for(BlackJackPlayer player : players){
+            Pair<BlackJackCard, BlackJackCard> cards = logic.givePlayerStartCards();
+            player.getCards().add(cards.getFirst());
+            player.getCards().add(cards.getSecond());
+            players.forEach(pts ->{
+                pts.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), player.getCardsValue(), player.getCards().size()));
+            });
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        Thread.sleep(1);
+        state=3;
+        rotationNext();
     }
 
     class BlackJackRoomTicker extends Thread{

@@ -5,6 +5,9 @@ import me.marcolvr.client.BlackJackInterface;
 import me.marcolvr.network.packet.serverbound.ServerboundFicheAction;
 import me.marcolvr.scanner.StreamScanner;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 public class BlackJackCli implements BlackJackInterface {
 
     private StreamScanner s;
@@ -22,14 +25,22 @@ public class BlackJackCli implements BlackJackInterface {
     public void requestUsername(boolean retry){
         if(retry) System.out.println("L'username inserito non è disponibile.");
         System.out.print("Inserisci l'username: ");
-        client.offerUsername(s.nextLine());
+        try{
+            client.offerUsername(s.nextLine());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void requestRoom(boolean retry) {
-        if(retry) System.out.println("La stanza non è al momento disponibile.");
+        if (retry) System.out.println("La stanza non è al momento disponibile.");
         System.out.print("Inserisci la stanza: ");
-        client.offerRoom(s.nextLine());
+        try {
+            client.offerRoom(s.nextLine());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -45,6 +56,7 @@ public class BlackJackCli implements BlackJackInterface {
             int scommessa = 0;
             do {
                 while (asyncInputWait && !s.hasNext()) {}
+                if(!asyncInputWait) return;
                 try{
                     scommessa=Integer.parseInt(s.nextLine());
                 }catch (Exception e){}
@@ -55,6 +67,19 @@ public class BlackJackCli implements BlackJackInterface {
         });
         req.start();
 
+    }
+
+    @Override
+    public void requestAction(){
+        Thread req = new Thread(()->{
+            asyncInputWait=true;
+            System.out.print("Che vuoi fare? 1 per aggiungere, altro per skippare: ");
+            while (asyncInputWait && !s.hasNext()) {}
+            if(!asyncInputWait) return;
+            client.offerAction(s.nextLine());
+            asyncInputWait=false;
+        });
+        req.start();
     }
 
     @Override
