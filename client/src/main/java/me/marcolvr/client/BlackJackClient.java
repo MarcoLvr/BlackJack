@@ -3,6 +3,7 @@ package me.marcolvr.client;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import me.marcolvr.client.cli.BlackJackCli;
+import me.marcolvr.client.cli.BlackJackGui;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.client.network.ServerConnection;
 import me.marcolvr.network.packet.clientbound.*;
@@ -36,6 +37,8 @@ public class BlackJackClient {
         //starting cli/gui client
         if(cli){
             ginterface=new BlackJackCli(this);
+        }else{
+            ginterface=new BlackJackGui(this);
         }
 
     }
