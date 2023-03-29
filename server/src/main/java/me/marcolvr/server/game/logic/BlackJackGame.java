@@ -3,6 +3,8 @@ package me.marcolvr.server.game.logic;
 import lombok.Getter;
 import me.marcolvr.server.game.logic.card.BlackJackCard;
 import me.marcolvr.server.game.logic.card.CardSeed;
+import me.marcolvr.server.game.player.BlackJackPlayer;
+import me.marcolvr.utils.Pair;
 
 import java.util.*;
 
@@ -13,6 +15,11 @@ public class BlackJackGame {
     private BlackJackDealer dealer;
 
     public BlackJackGame(){
+        dealer=new BlackJackDealer();
+        init();
+    }
+
+    public void init(){
         mazzo=new Stack<>();
         Arrays.stream(CardSeed.values()).toList().forEach(value ->{
             for (int i = 1; i <= 13; i++) {
@@ -24,18 +31,6 @@ public class BlackJackGame {
         Pair<BlackJackCard, BlackJackCard> dealerCards = givePlayerStartCards();
         dealer.addCard(dealerCards.getFirst());
         dealer.addCard(dealerCards.getSecond());
-    }
-
-    public void init(){
-        shuffle();
-    }
-
-    public List<BlackJackCard> addPlayerCards() {
-        List<BlackJackCard> cardsSelected = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
-            cardsSelected.add(mazzo.pop());
-        }
-        return cardsSelected;
     }
 
     public void shuffle(){
@@ -56,6 +51,17 @@ public class BlackJackGame {
             }
         }
     }
+
+    public Pair<BlackJackCard, BlackJackCard> givePlayerStartCards() {
+        return new Pair<>(mazzo.pop(),mazzo.pop());
+    }
+
+    public BlackJackCard givePlayerRandomCard() {
+        return mazzo.pop();
+    }
+
+
+
 
 
 
