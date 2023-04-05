@@ -19,7 +19,7 @@ import java.util.Stack;
 
 public class BlackJackRoom {
 
-    private final int START_SECONDS = 5;
+    private final int START_SECONDS = 30;
     private final int MIN_PLAYERS = 2;
 
     @Getter
@@ -116,7 +116,7 @@ public class BlackJackRoom {
                     return;
                 }
                 player.getConnection().sendPacket(new ClientboundGameEnd(2));
-                player.setFiches(player.getFiches()+Math.abs(player.getLastTransaction())*2);
+                player.setFiches(player.getFiches()+(Math.abs(player.getLastTransaction())*2));
 
             });
             try {
