@@ -11,4 +11,12 @@ public interface BlackJackInterface {
     boolean isWaitingForInput();
 
     void requestAction();
+
+    void updateLobbyStatus(int players, boolean starting, int time);
+
+    void playerUpdate(String name, int fiches, int cards, int cardsValue);
+
+    void gameUpdate(String selection, int state);
+
+    void gameEnd(int state);
 }

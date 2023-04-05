@@ -28,13 +28,12 @@ public class BlackJackGame {
         });
         shuffle();
         dealer.reset();
-        Pair<BlackJackCard, BlackJackCard> dealerCards = givePlayerStartCards();
-        dealer.addCard(dealerCards.getFirst());
-        dealer.addCard(dealerCards.getSecond());
+        dealer.addCard(givePlayerRandomCard());
     }
 
     public void shuffle(){
-        double sel = Math.random();
+        Collections.shuffle(mazzo);
+        /*double sel = Math.random();
         if(sel>0.5){
             List<BlackJackCard> copy = new ArrayList<>(mazzo);
             mazzo.clear();
@@ -49,12 +48,12 @@ public class BlackJackGame {
                 mazzo.add(random, copia);
                 mazzo.remove(0);
             }
-        }
+        }*/
     }
 
-    public Pair<BlackJackCard, BlackJackCard> givePlayerStartCards() {
+    /*public Pair<BlackJackCard, BlackJackCard> givePlayerStartCards() {
         return new Pair<>(mazzo.pop(),mazzo.pop());
-    }
+    }*/
 
     public BlackJackCard givePlayerRandomCard() {
         return mazzo.pop();

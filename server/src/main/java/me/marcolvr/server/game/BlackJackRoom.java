@@ -107,12 +107,16 @@ public class BlackJackRoom {
                 if(player.getCardsValue()>21) return;
                 if(dealer.getCardsValue()>21 || player.getCardsValue()>dealer.getCardsValue()){
                     player.getConnection().sendPacket(new ClientboundGameEnd(2));
-                    player.setFiches(Math.abs(player.getLastTransaction())*2);
+                    player.setFiches(player.getFiches()-Math.abs(player.getLastTransaction()));
+                    return;
                 }
                 if(player.getCardsValue()==dealer.getCardsValue()){
                     player.getConnection().sendPacket(new ClientboundGameEnd(1));
-                    player.setFiches(Math.abs(player.getLastTransaction())*2);
+                    player.setFiches(player.getFiches()+Math.abs(player.getLastTransaction()));
+                    return;
                 }
+                player.getConnection().sendPacket(new ClientboundGameEnd(2));
+                player.setFiches(player.getFiches()+Math.abs(player.getLastTransaction())*2);
 
             });
             try {
@@ -164,6 +168,7 @@ public class BlackJackRoom {
 
         //
         players.forEach(player -> {
+            player.setCards(new ArrayList<>());
             player.allowTransactions(false);
             player.getConnection().sendPacket(new ClientboundGameUpdate(0, null));
         });
@@ -179,9 +184,8 @@ public class BlackJackRoom {
         });
         Thread.sleep(1);
         for(BlackJackPlayer player : players){
-            Pair<BlackJackCard, BlackJackCard> cards = logic.givePlayerStartCards();
-            player.getCards().add(cards.getFirst());
-            player.getCards().add(cards.getSecond());
+            player.getCards().add(logic.givePlayerRandomCard());
+            player.getConnection().sendPacket(new ClientboundPlayerUpdate("Banco", 0, logic.getDealer().getCardsValue(), logic.getDealer().getCards().size()));
             players.forEach(pts ->{
                 pts.getConnection().sendPacket(new ClientboundPlayerUpdate(player.getUsername(), player.getFiches(), player.getCardsValue(), player.getCards().size()));
             });

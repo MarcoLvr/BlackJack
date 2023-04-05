@@ -33,6 +33,7 @@ public class BlackJackDealer {
 
     public void addCard(BlackJackCard card){
         cards.add(card);
+
     }
 
     public void setCards(List<BlackJackCard> cards) {

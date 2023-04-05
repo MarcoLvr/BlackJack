@@ -7,6 +7,7 @@ import me.marcolvr.client.cli.BlackJackGui;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.client.network.ServerConnection;
 import me.marcolvr.network.packet.clientbound.*;
+import me.marcolvr.network.packet.serverbound.ServerboundFicheAction;
 import me.marcolvr.network.packet.serverbound.ServerboundPlayAction;
 import me.marcolvr.network.packet.serverbound.ServerboundRoom;
 import me.marcolvr.network.packet.serverbound.ServerboundUsername;
@@ -43,20 +44,6 @@ public class BlackJackClient {
 
     }
 
-    private void lobbyAction(ClientboundLobbyUpdate packet){
-        if(!packet.isStarting() && packet.getStartSeconds()==0) {
-            System.out.println("In attesa di giocatori. Attualmente " + packet.getPlayers());
-            return;
-        }
-        if(packet.isStarting()){
-            if(packet.getStartSeconds()%10==0 || packet.getStartSeconds()<10){
-                System.out.println("Avvio in " + packet.getStartSeconds());
-            }
-            return;
-        }
-        System.out.println("Avvio annullato");
-    }
-
     public void offerUsername(String username){
         if(connection.sendPacket(new ServerboundUsername(username)))
             this.username=username;
@@ -67,6 +54,10 @@ public class BlackJackClient {
             this.room=room;
     }
 
+    public void offerFiches(int fiches){
+       getConnection().sendPacket(new ServerboundFicheAction(Math.abs(fiches)*-1));
+    }
+
     private void registerCallbacks(){
         connection.onConnectionError((e)->{
             Logger.err("An error occurred with Connection. Closing client");
@@ -74,83 +65,45 @@ public class BlackJackClient {
         });
         connection.onPacketReceive((byte) 0, (packet)->{
             ClientboundACK ack = (ClientboundACK) packet;
-            Logger.info("Received ACK of packet " + ack.getReferredPacketId()); //TODO: togli
+            Logger.info("ACK: packet=" + ack.getReferredPacketId());
             if(!connection.isLastPackedConfirmed()) return;
-            switch (ack.getReferredPacketId()){
-                case 2 ->{
-                    Logger.info("Username accepted");
-                    ginterface.requestRoom(false);
-                }
-                case 3 ->{
-                    Logger.info("Joined the room");
-                }
+            if (ack.getReferredPacketId() == 2) {
+                ginterface.requestRoom(false);
             }
         });
         connection.onPacketReceive((byte) 127, (packet)->{
             ClientboundNACK nack = (ClientboundNACK) packet;
-            Logger.info("Received NACK of packet " + nack.getReferredPacketId()); //TODO: togli
+            Logger.info("NACK: packet=" + nack.getReferredPacketId());
             if(!connection.isLastPackedConfirmed()) return;
             switch (nack.getReferredPacketId()){
                 case 2 ->{
-                    Logger.info("Username refused");
                     ginterface.requestUsername(true);
                 }
                 case 3 ->{
-                    Logger.info("Room unavailable");
                     ginterface.requestRoom(true);
                 }
             }
         });
         connection.onPacketReceive((byte) 2, (packet) ->{
             ClientboundLobbyUpdate p = (ClientboundLobbyUpdate) packet;
-            lobbyAction(p);
+            Logger.info("Lobby update: players=" + p.getPlayers() + " starting=" + p.isStarting() + " time=" + p.getStartSeconds());
+            ginterface.updateLobbyStatus(p.getPlayers(), p.isStarting(), p.getStartSeconds());
         });
         connection.onPacketReceive((byte) 4, (packet) ->{
             ClientboundGameUpdate p = (ClientboundGameUpdate) packet;
-            switch (p.getState()){
-                case 0 ->{
-                    Logger.info("Game started");
-                    System.out.println("Si inizia!");
-                    System.out.println("Giocatori:");
-                    ginterface.requestFiches(false);
-                }
-                case 1->{
-                    if(ginterface.isWaitingForInput()){
-                        ginterface.requestFiches(true);
-                    }
-                }
-            }
+            Logger.info("Game update: selection=" + p.getSelection() + " state=" + p.getState());
+            ginterface.gameUpdate(p.getSelection(), p.getState());
         });
         connection.onPacketReceive((byte) 3, (packet) ->{
             ClientboundPlayerUpdate p = (ClientboundPlayerUpdate) packet;
-            System.out.println(p.getUsername() + ": Ha " + p.getFiches() + " fiches e ha " + p.getCards() + " con valore totale di " + p.getCardsValue());
-            Logger.info("Player update: " + p.getUsername() + " fiches: " +p.getFiches() + " totalCards: " + p.getCards() + " cardsValue: " + p.getCardsValue());
-        });
-        connection.onPacketReceive((byte) 4, (packet) ->{
-            ClientboundGameUpdate p = (ClientboundGameUpdate) packet;
-            Logger.info("Game update: " + p.getSelection() + " " + p.getState());
-            switch (p.getState()){
-                case 3 ->{
-                    if(p.getSelection().equals(username)){
-                        ginterface.requestAction();
-                    }
-                }
-            }
+            Logger.info("Player update: username=" + p.getUsername() + " fiches=" +p.getFiches() + " cards=" + p.getCards() + " cardsValue=" + p.getCardsValue());
+            ginterface.playerUpdate(p.getUsername(), p.getFiches(), p.getCards(), p.getCardsValue());
         });
 
         connection.onPacketReceive((byte) 6, (packet)->{
             ClientboundGameEnd end = (ClientboundGameEnd) packet;
-            switch (end.getState()){
-                case 0 ->{
-                    System.out.println("Hai perso! Hai superato 21");
-                }
-                case 1 ->{
-                    System.out.println("Hai pareggiato col banco!");
-                }
-                case 2 ->{
-                    System.out.println("Hai vinto! Il banco ha un valore più basso!");
-                }
-            }
+            Logger.info("Game End: state=" + end.getState());
+            ginterface.gameEnd(end.getState());
         });
 
     }

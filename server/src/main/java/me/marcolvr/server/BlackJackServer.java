@@ -31,6 +31,7 @@ public class BlackJackServer {
     }
 
     public boolean createBlackJackPlayer(PlayerConnection connection, String username){
+        if(username.isEmpty() || username.equalsIgnoreCase("banco")) return false;
         if(players.stream().anyMatch(p -> p.getUsername()!=null && p.getUsername().equalsIgnoreCase(username))) return false;
         BlackJackPlayer player = new BlackJackPlayer(connection, username);
         players.add(player);
@@ -39,6 +40,7 @@ public class BlackJackServer {
     }
 
     public boolean joinRoom(BlackJackPlayer player, String roomId){
+        if(roomId.isEmpty()) return false;
         BlackJackRoom room = rooms.stream().filter(r -> r.getId().equalsIgnoreCase(roomId)).findFirst().orElse(null);
         boolean res;
         if(room==null){

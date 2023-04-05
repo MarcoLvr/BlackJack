@@ -83,6 +83,62 @@ public class BlackJackCli implements BlackJackInterface {
     }
 
     @Override
+    public void updateLobbyStatus(int players, boolean starting, int time) {
+        if(!starting && time==0) {
+            System.out.println("In attesa di giocatori. Attualmente " + players);
+            return;
+        }
+        if(starting){
+            if(time%10==0 || time<10){
+                System.out.println("Avvio in " + time);
+            }
+            return;
+        }
+        System.out.println("Avvio annullato");
+    }
+
+    @Override
+    public void playerUpdate(String name, int fiches, int cards, int cardsValue) {
+        System.out.println(name + ": Ha " + fiches + " fiches e ha " + cards + " con valore totale di " + cardsValue);
+    }
+
+    @Override
+    public void gameUpdate(String selection, int state) {
+        switch (state){
+            case 0 ->{
+                System.out.println("Si inizia!");
+                System.out.println("Giocatori:");
+                requestFiches(false);
+            }
+            case 1 ->{
+                if(isWaitingForInput()){
+                    requestFiches(true);
+                }
+            }
+            case 3 ->{
+                if(selection.equals(client.getUsername())) {
+                    requestAction();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void gameEnd(int state) {
+        switch (state){
+            case 0 ->{
+                System.out.println("Hai perso! Hai superato 21");
+            }
+            case 1 ->{
+                System.out.println("Hai pareggiato col banco!");
+            }
+            case 2 ->{
+                System.out.println("Hai vinto! Il banco ha un valore più basso!");
+            }
+        }
+    }
+
+    @Override
     public boolean isWaitingForInput() {
         return asyncInputWait;
     }
