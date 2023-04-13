@@ -32,6 +32,7 @@ public class UsernamePanel extends JPanel {
         usernameButton.onComponentEvent(event ->{
             client.offerUsername(usernameTextField.getText());
         });
+
         setOpaque(true);
         setBackground(new Color(173,38,38));
         constraints.gridy=1;

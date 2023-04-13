@@ -23,7 +23,7 @@ public class BlackJackGame {
         mazzo=new Stack<>();
         Arrays.stream(CardSeed.values()).toList().forEach(value ->{
             for (int i = 1; i <= 13; i++) {
-                mazzo.add(new BlackJackCard(value, i));
+                mazzo.add(new BlackJackCard(value, Math.min(i, 10)));
             }
         });
         shuffle();
@@ -33,27 +33,7 @@ public class BlackJackGame {
 
     public void shuffle(){
         Collections.shuffle(mazzo);
-        /*double sel = Math.random();
-        if(sel>0.5){
-            List<BlackJackCard> copy = new ArrayList<>(mazzo);
-            mazzo.clear();
-            Random r = new Random();
-            while (!copy.isEmpty()){
-                mazzo.add(copy.remove(r.nextInt(copy.size())));
-            }
-        }else {
-            for (int i = 0; i < 104; i++) {
-                int random = (int)(Math.random()*104.0);
-                BlackJackCard copia = mazzo.get(i);
-                mazzo.add(random, copia);
-                mazzo.remove(0);
-            }
-        }*/
     }
-
-    /*public Pair<BlackJackCard, BlackJackCard> givePlayerStartCards() {
-        return new Pair<>(mazzo.pop(),mazzo.pop());
-    }*/
 
     public BlackJackCard givePlayerRandomCard() {
         return mazzo.pop();

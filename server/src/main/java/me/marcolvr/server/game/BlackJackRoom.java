@@ -107,7 +107,7 @@ public class BlackJackRoom {
                 if(player.getCardsValue()>21) return;
                 if(dealer.getCardsValue()>21 || player.getCardsValue()>dealer.getCardsValue()){
                     player.getConnection().sendPacket(new ClientboundGameEnd(2));
-                    player.setFiches(player.getFiches()-Math.abs(player.getLastTransaction()));
+                    player.setFiches(player.getFiches()+(Math.abs(player.getLastTransaction())*2));
                     return;
                 }
                 if(player.getCardsValue()==dealer.getCardsValue()){
@@ -116,8 +116,7 @@ public class BlackJackRoom {
                     return;
                 }
                 player.getConnection().sendPacket(new ClientboundGameEnd(2));
-                player.setFiches(player.getFiches()+(Math.abs(player.getLastTransaction())*2));
-
+                player.setFiches(player.getFiches()-Math.abs(player.getLastTransaction()));
             });
             try {
                 Thread.sleep(5000);
