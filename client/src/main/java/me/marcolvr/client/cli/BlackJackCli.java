@@ -3,6 +3,7 @@ package me.marcolvr.client.cli;
 import me.marcolvr.client.BlackJackClient;
 import me.marcolvr.client.BlackJackInterface;
 import me.marcolvr.network.packet.serverbound.ServerboundFicheAction;
+import me.marcolvr.network.packet.serverbound.ServerboundPacket;
 import me.marcolvr.scanner.StreamScanner;
 
 import java.io.BufferedReader;
@@ -62,7 +63,7 @@ public class BlackJackCli implements BlackJackInterface {
                 }catch (Exception e){}
             }while (scommessa==0);
             asyncInputWait=false;
-            client.getConnection().sendPacket(new ServerboundFicheAction(Math.abs(scommessa)*-1));
+            client.getConnection().sendPacket(ServerboundPacket.ficheAction(Math.abs(scommessa)*-1));
             System.out.println("Hai scommesso " + Math.abs(scommessa)*-1);
         });
         req.start();

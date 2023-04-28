@@ -7,10 +7,7 @@ import me.marcolvr.client.cli.BlackJackGui;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.client.network.ServerConnection;
 import me.marcolvr.network.packet.clientbound.*;
-import me.marcolvr.network.packet.serverbound.ServerboundFicheAction;
-import me.marcolvr.network.packet.serverbound.ServerboundPlayAction;
-import me.marcolvr.network.packet.serverbound.ServerboundRoom;
-import me.marcolvr.network.packet.serverbound.ServerboundUsername;
+import me.marcolvr.network.packet.serverbound.*;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -45,17 +42,17 @@ public class BlackJackClient {
     }
 
     public void offerUsername(String username){
-        if(connection.sendPacket(new ServerboundUsername(username)))
+        if(connection.sendPacket(ServerboundPacket.username(username)))
             this.username=username;
     }
 
     public void offerRoom(String room){
-        if(connection.sendPacket(new ServerboundRoom(room)))
+        if(connection.sendPacket(ServerboundPacket.room(room)))
             this.room=room;
     }
 
     public void offerFiches(int fiches){
-       getConnection().sendPacket(new ServerboundFicheAction(Math.abs(fiches)*-1));
+       getConnection().sendPacket(ServerboundPacket.ficheAction(Math.abs(fiches)*-1));
     }
 
     private void registerCallbacks(){
@@ -109,7 +106,7 @@ public class BlackJackClient {
     }
 
     public void offerAction(String action){
-        connection.sendPacket(new ServerboundPlayAction(action.equals("1")));
+        connection.sendPacket(ServerboundPacket.playAction(action.equals("1")));
 
     }
 }

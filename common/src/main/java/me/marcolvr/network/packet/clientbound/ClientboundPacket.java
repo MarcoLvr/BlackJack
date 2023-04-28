@@ -2,6 +2,8 @@ package me.marcolvr.network.packet.clientbound;
 
 import me.marcolvr.network.packet.Packet;
 
+import java.util.Optional;
+
 public interface ClientboundPacket extends Packet {
 
     enum GameEndState { LOSE, TIE, WIN }
@@ -36,6 +38,15 @@ public interface ClientboundPacket extends Packet {
 
     static ClientboundPlayerUpdate playerUpdate(String username, int fiches, int cardsValue, int cards){
         return new ClientboundPlayerUpdate(username, fiches, cardsValue, cards);
+    }
+
+    private static <T> Optional<T> read(ClientboundPacket packet, T cast){
+        try{
+            T casted= (T) cast.getClass().cast(packet);
+            return Optional.of(casted);
+        }catch (ClassCastException e){
+            return Optional.empty();
+        }
     }
 
 
