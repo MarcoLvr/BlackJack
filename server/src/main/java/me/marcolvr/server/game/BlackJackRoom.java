@@ -75,7 +75,7 @@ public class BlackJackRoom {
         if(state==1){
             if(players.size()<MIN_PLAYERS) {
                 state=0;
-                BlackJackServer.getInstance().multicast(ClientboundPacket.createLobbyUpdate(false, time, players.size()), this);
+                BlackJackServer.getInstance().multicast(ClientboundPacket.lobbyUpdate(false, time, players.size()), this);
                 time=0;
                 return;
             }
@@ -85,7 +85,7 @@ public class BlackJackRoom {
                 startRound();
                 return;
             }
-            BlackJackServer.getInstance().multicast(ClientboundPacket.createLobbyUpdate(true, time, players.size()), this);
+            BlackJackServer.getInstance().multicast(ClientboundPacket.lobbyUpdate(true, time, players.size()), this);
         }
 
     }
@@ -99,16 +99,16 @@ public class BlackJackRoom {
             players.forEach(player -> {
                 if(player.getCardsValue()>21) return;
                 if(dealer.getCardsValue()>21 || player.getCardsValue()>dealer.getCardsValue()){
-                    player.getConnection().sendPacket(ClientboundPacket.createGameEnd(ClientboundPacket.GameEndState.WIN));
+                    player.getConnection().sendPacket(ClientboundPacket.gameEnd(ClientboundPacket.GameEndState.WIN));
                     player.setFiches(player.getFiches()+(Math.abs(player.getLastTransaction())*2));
                     return;
                 }
                 if(player.getCardsValue()==dealer.getCardsValue()){
-                    player.getConnection().sendPacket(ClientboundPacket.createGameEnd(ClientboundPacket.GameEndState.TIE));
+                    player.getConnection().sendPacket(ClientboundPacket.gameEnd(ClientboundPacket.GameEndState.TIE));
                     player.setFiches(player.getFiches()+Math.abs(player.getLastTransaction()));
                     return;
                 }
-                player.getConnection().sendPacket(ClientboundPacket.createGameEnd(ClientboundPacket.GameEndState.LOSE));
+                player.getConnection().sendPacket(ClientboundPacket.gameEnd(ClientboundPacket.GameEndState.LOSE));
                 player.setFiches(player.getFiches()-Math.abs(player.getLastTransaction()));
             });
             try {
@@ -121,11 +121,11 @@ public class BlackJackRoom {
         }
         currentRotating = rotation.pop();
         if(!currentRotating.isOnline()){
-            BlackJackServer.getInstance().multicast(ClientboundPacket.createPlayerUpdate(currentRotating.getUsername(), -1, 0, 0), this);
+            BlackJackServer.getInstance().multicast(ClientboundPacket.playerUpdate(currentRotating.getUsername(), -1, 0, 0), this);
             rotationNext();
             return;
         }
-        BlackJackServer.getInstance().multicast(ClientboundPacket.createGameUpdate(ClientboundPacket.GameUpdateState.PLAYER_ACTION, currentRotating.getUsername()), this);
+        BlackJackServer.getInstance().multicast(ClientboundPacket.gameUpdate(ClientboundPacket.GameUpdateState.PLAYER_ACTION, currentRotating.getUsername()), this);
     }
 
     public void rotationAction(BlackJackPlayer player, boolean addCard){
@@ -133,12 +133,12 @@ public class BlackJackRoom {
         if(addCard){
             player.getCards().add(logic.givePlayerRandomCard());
         }
-        BlackJackServer.getInstance().multicast(ClientboundPacket.createPlayerUpdate(player.getUsername(), player.getFiches(), player.getCardsValue(),player.getCards().size()), this);
+        BlackJackServer.getInstance().multicast(ClientboundPacket.playerUpdate(player.getUsername(), player.getFiches(), player.getCardsValue(),player.getCards().size()), this);
         if(player.getCardsValue()>21){
-            player.getConnection().sendPacket(ClientboundPacket.createGameEnd(ClientboundPacket.GameEndState.LOSE));
+            player.getConnection().sendPacket(ClientboundPacket.gameEnd(ClientboundPacket.GameEndState.LOSE));
         }else{
             if(addCard){
-                BlackJackServer.getInstance().multicast(ClientboundPacket.createGameUpdate(ClientboundPacket.GameUpdateState.PLAYER_ACTION, currentRotating.getUsername()), this);
+                BlackJackServer.getInstance().multicast(ClientboundPacket.gameUpdate(ClientboundPacket.GameUpdateState.PLAYER_ACTION, currentRotating.getUsername()), this);
                 rotation.add(rotation.size(), player);
             }
         }
@@ -152,11 +152,11 @@ public class BlackJackRoom {
         players.forEach(player -> {
             player.setCards(new ArrayList<>());
             player.allowTransactions(false);
-            player.getConnection().sendPacket(ClientboundPacket.createGameUpdate(ClientboundPacket.GameUpdateState.INIT, null));
+            player.getConnection().sendPacket(ClientboundPacket.gameUpdate(ClientboundPacket.GameUpdateState.INIT, null));
         });
         Thread.sleep(10000);
         players.forEach(player -> {
-            player.getConnection().sendPacket(ClientboundPacket.createGameUpdate(ClientboundPacket.GameUpdateState.START, null));
+            player.getConnection().sendPacket(ClientboundPacket.gameUpdate(ClientboundPacket.GameUpdateState.START, null));
             if(!player.isLastTransactionFromClient() || player.getLastTransaction()>=0){
                 int fiches = player.makeFichesTransaction(2000, false,false);
                 if(fiches==-1) {
@@ -169,8 +169,8 @@ public class BlackJackRoom {
             player.getCards().add(logic.givePlayerRandomCard());
             //TODO: implement clientside
             //OLD: new ClientboundPlayerUpdate("Banco", 0, logic.getDealer().getCardsValue(), logic.getDealer().getCards().size())
-            player.getConnection().sendPacket(ClientboundPacket.createDealerUpdate(logic.getDealer().getCardsValue(), logic.getDealer().getCards().size(), logic.getDealer().lastCardValue()));
-            BlackJackServer.getInstance().multicast(ClientboundPacket.createPlayerUpdate(player.getUsername(), player.getFiches(), player.getCardsValue(), player.getCards().size()), this);
+            player.getConnection().sendPacket(ClientboundPacket.dealerUpdate(logic.getDealer().getCardsValue(), logic.getDealer().getCards().size(), logic.getDealer().lastCardValue()));
+            BlackJackServer.getInstance().multicast(ClientboundPacket.playerUpdate(player.getUsername(), player.getFiches(), player.getCardsValue(), player.getCards().size()), this);
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {

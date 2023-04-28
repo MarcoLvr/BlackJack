@@ -1,12 +1,13 @@
 package me.marcolvr.network.packet.serverbound;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class ServerboundRoom implements ServerboundPacket{
 
     private String room;
