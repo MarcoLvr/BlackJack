@@ -9,6 +9,7 @@ import me.marcolvr.network.packet.clientbound.ClientboundNACK;
 import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 import me.marcolvr.network.packet.serverbound.ServerboundPacket;
 import me.marcolvr.network.packet.serverbound.ServerboundUsername;
+import me.marcolvr.server.logger.LogMessages;
 
 import java.net.Socket;
 
@@ -16,7 +17,7 @@ public class PlayerConnection extends Connection<ServerboundPacket, ClientboundP
 
     public PlayerConnection(Socket socket){
         super(socket);
-        Logger.info(getAddress() + " connected");
+        LogMessages.newConnection(getAddress());
         onPacketReceive((byte) 2, (packet)->{
             if(!BlackJackServer.getInstance().createBlackJackPlayer(this, ((ServerboundUsername) packet).getUsername())){
                 sendPacket(ClientboundPacket.createNACK((byte) 0x02));

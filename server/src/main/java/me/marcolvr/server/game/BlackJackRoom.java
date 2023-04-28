@@ -14,8 +14,8 @@ import java.util.Stack;
 
 public class BlackJackRoom {
 
-    private final int START_SECONDS = 30;
-    private final int MIN_PLAYERS = 2;
+    private static final int START_SECONDS = 30;
+    private static final int MIN_PLAYERS = 2;
 
     @Getter
     private final String id;
@@ -48,7 +48,7 @@ public class BlackJackRoom {
     }
 
     public boolean isFull(){
-        return players.size()==5;
+        return players.size()==4;
     }
 
     public boolean addPlayer(BlackJackPlayer player){
@@ -149,8 +149,6 @@ public class BlackJackRoom {
         logic.init();
         rotation=new Stack<>();
         rotation.addAll(players);
-
-        //
         players.forEach(player -> {
             player.setCards(new ArrayList<>());
             player.allowTransactions(false);

@@ -4,6 +4,7 @@ import lombok.Getter;
 import me.marcolvr.server.BlackJackServer;
 import me.marcolvr.server.game.player.PlayerConnection;
 import me.marcolvr.logger.Logger;
+import me.marcolvr.server.logger.LogMessages;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,9 +24,9 @@ public class ServerConnection {
             socket=new ServerSocket(port);
             connectionThread=new ServerConnectionThread();
             connectionThread.start();
-            Logger.info("Listening on " + port);
+            LogMessages.listening(port);
         }catch (IOException e){
-            Logger.err("Error trying to open server socket: " + e.getMessage());
+            LogMessages.sockError(e.getMessage());
         }
 
     }

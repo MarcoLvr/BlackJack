@@ -3,6 +3,7 @@ package me.marcolvr.server;
 import lombok.Getter;
 import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 import me.marcolvr.server.game.BlackJackRoom;
+import me.marcolvr.server.logger.LogMessages;
 import me.marcolvr.server.network.HeartbeatTask;
 import me.marcolvr.server.network.ServerConnection;
 import me.marcolvr.server.game.player.BlackJackPlayer;
@@ -33,7 +34,7 @@ public class BlackJackServer {
         rooms=new ArrayList<>();
         heartbeatTask=new HeartbeatTask(this);
         heartbeatTask.start();
-        Logger.info("BlackJack Server started!");
+        LogMessages.serverStarted();
     }
 
     public boolean createBlackJackPlayer(PlayerConnection connection, String username){
@@ -41,7 +42,7 @@ public class BlackJackServer {
         if(players.stream().anyMatch(p -> p.getUsername()!=null && p.getUsername().equalsIgnoreCase(username))) return false;
         BlackJackPlayer player = new BlackJackPlayer(connection, username);
         players.add(player);
-        Logger.info(player.getConnection().getAddress() + " logged in as " + player.getUsername());
+        LogMessages.loggedIn(player.getConnection().getAddress(), player.getUsername());
         return true;
     }
 
@@ -65,7 +66,7 @@ public class BlackJackServer {
         player.getConnection().close();
         if(player.getRoom()!=null) player.getRoom().removePlayer(player);
         players.remove(player);
-        Logger.info((player.getUsername() != null ? player.getUsername() : player.getConnection().getAddress()) + " disconnected. Reason: " + reason);
+        LogMessages.disconnected(player.getUsername() != null ? player.getUsername() : player.getConnection().getAddress(), reason);
     }
 
     public void multicast(ClientboundPacket packet, String roomId){
