@@ -1,5 +1,6 @@
 package me.marcolvr.server.network;
 
+import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 import me.marcolvr.server.BlackJackServer;
 import me.marcolvr.server.game.player.BlackJackPlayer;
 import me.marcolvr.network.packet.clientbound.ClientboundHeartbeat;
@@ -25,7 +26,7 @@ public class HeartbeatTask extends Thread{
             while (iterator.hasNext()){
                 BlackJackPlayer player = iterator.next();
                 if(System.currentTimeMillis()-player.getConnection().getLastSentPacket()>5000){
-                    if(!player.getConnection().sendPacket(new ClientboundHeartbeat())){
+                    if(!player.getConnection().sendPacket(ClientboundPacket.createHeartbeat())){
                         toDisconnect.add(player);
                     };
                 }

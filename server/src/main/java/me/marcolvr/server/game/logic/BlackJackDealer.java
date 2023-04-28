@@ -41,5 +41,8 @@ public class BlackJackDealer {
     }
 
 
-
+    public byte lastCardValue() {
+        BlackJackCard c = cards.get(cards.size()-1);
+        return (byte) ((c.getSeed().ordinal()+1)*13+c.getValue());
+    }
 }

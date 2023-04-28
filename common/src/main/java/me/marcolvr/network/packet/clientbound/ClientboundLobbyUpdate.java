@@ -1,12 +1,13 @@
 package me.marcolvr.network.packet.clientbound;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import me.marcolvr.network.Connection;
 import me.marcolvr.network.packet.serverbound.ServerboundPacket;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class ClientboundLobbyUpdate implements ClientboundPacket {
 
     private boolean starting;

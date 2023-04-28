@@ -6,10 +6,7 @@ import java.io.IOException;
 
 public class Main {
 
-    @Getter
-    private static BlackJackServer blackJackServer;
     public static void main(String[] args) throws IOException {
-        //TODO: args
-        blackJackServer = new BlackJackServer(24512);
+        new BlackJackServer(24512);
     }
 }

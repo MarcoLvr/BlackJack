@@ -34,7 +34,7 @@ public class ServerConnection {
 
         @Override
         public void run(){
-            while (null==null){ //si lo so che si scrive while(true) ma c'è tutta una storia dietro a questo
+            while (true){
                 try {
                     new PlayerConnection(socket.accept());
                 } catch (IOException e) {

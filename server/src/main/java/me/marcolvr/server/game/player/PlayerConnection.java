@@ -1,5 +1,6 @@
 package me.marcolvr.server.game.player;
 
+import me.marcolvr.server.BlackJackServer;
 import me.marcolvr.server.Main;
 import me.marcolvr.logger.Logger;
 import me.marcolvr.network.Connection;
@@ -17,10 +18,10 @@ public class PlayerConnection extends Connection<ServerboundPacket, ClientboundP
         super(socket);
         Logger.info(getAddress() + " connected");
         onPacketReceive((byte) 2, (packet)->{
-            if(!Main.getBlackJackServer().createBlackJackPlayer(this, ((ServerboundUsername) packet).getUsername())){
-                sendPacket(new ClientboundNACK((byte) 0x02));
+            if(!BlackJackServer.getInstance().createBlackJackPlayer(this, ((ServerboundUsername) packet).getUsername())){
+                sendPacket(ClientboundPacket.createNACK((byte) 0x02));
             }else{
-                sendPacket(new ClientboundACK((byte) 0x02));
+                sendPacket(ClientboundPacket.createACK((byte) 0x02));
             }
         });
     }

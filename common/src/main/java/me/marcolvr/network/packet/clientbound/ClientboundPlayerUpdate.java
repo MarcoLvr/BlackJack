@@ -1,12 +1,13 @@
 package me.marcolvr.network.packet.clientbound;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.List;
 
 @Getter
-@AllArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PACKAGE)
 public class ClientboundPlayerUpdate implements ClientboundPacket {
 
     private String username;

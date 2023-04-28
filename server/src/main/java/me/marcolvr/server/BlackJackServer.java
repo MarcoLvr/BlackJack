@@ -1,6 +1,7 @@
 package me.marcolvr.server;
 
 import lombok.Getter;
+import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 import me.marcolvr.server.game.BlackJackRoom;
 import me.marcolvr.server.network.HeartbeatTask;
 import me.marcolvr.server.network.ServerConnection;
@@ -10,9 +11,13 @@ import me.marcolvr.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 public class BlackJackServer {
+
+    @Getter
+    private static BlackJackServer instance;
 
     private final int port;
     private final ServerConnection serverConnection;
@@ -21,6 +26,7 @@ public class BlackJackServer {
     private final List<BlackJackRoom> rooms;
 
     public BlackJackServer(int port){
+        instance=this;
         this.port=port;
         serverConnection=new ServerConnection(port, this);
         players=new ArrayList<>();
@@ -60,6 +66,19 @@ public class BlackJackServer {
         if(player.getRoom()!=null) player.getRoom().removePlayer(player);
         players.remove(player);
         Logger.info((player.getUsername() != null ? player.getUsername() : player.getConnection().getAddress()) + " disconnected. Reason: " + reason);
+    }
+
+    public void multicast(ClientboundPacket packet, String roomId){
+        Optional<BlackJackRoom> room = rooms.stream().filter(r -> r.getId().equalsIgnoreCase(roomId)).findFirst();
+        if(room.isEmpty()) return;
+        multicast(packet, room.get());
+    }
+
+    public void multicast(ClientboundPacket packet, BlackJackRoom room){
+        assert room != null;
+        room.getPlayers().forEach(player -> {
+            player.getConnection().sendPacket(packet);
+        });
     }
 
 }

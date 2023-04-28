@@ -2,8 +2,10 @@ package me.marcolvr.server.game.player;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.marcolvr.network.packet.clientbound.ClientboundPacket;
 import me.marcolvr.network.packet.serverbound.ServerboundFicheAction;
 import me.marcolvr.network.packet.serverbound.ServerboundPlayAction;
+import me.marcolvr.server.BlackJackServer;
 import me.marcolvr.server.Main;
 import me.marcolvr.server.game.BlackJackRoom;
 import me.marcolvr.network.packet.clientbound.ClientboundACK;
@@ -36,31 +38,31 @@ public class BlackJackPlayer {
 
         cards=new ArrayList<>();
         connection.onConnectionError((e)->{
-            Main.getBlackJackServer().disconnect(this, "Connection Error: " + e.getMessage());
+            BlackJackServer.getInstance().disconnect(this, "Connection Error: " + e.getMessage());
         });
         connection.onPacketReceive((byte) 3, (packet)->{
-            if(room!=null || !Main.getBlackJackServer().joinRoom(this, ((ServerboundRoom) packet).getRoom())){
-                connection.sendPacket(new ClientboundNACK((byte) 0x03));
+            if(room!=null || !BlackJackServer.getInstance().joinRoom(this, ((ServerboundRoom) packet).getRoom())){
+                connection.sendPacket(ClientboundPacket.createNACK((byte) 0x03));
             }else{
-                connection.sendPacket(new ClientboundACK((byte) 0x03));
-                connection.sendPacket(new ClientboundLobbyUpdate(room.getState()==1, room.getTime(), room.getPlayers().size()));
+                connection.sendPacket(ClientboundPacket.createACK((byte) 0x03));
+                connection.sendPacket(ClientboundPacket.createLobbyUpdate(room.getState()==1, room.getTime(), room.getPlayers().size()));
             }
         });
         connection.onPacketReceive((byte) 5, (packet)->{
             ServerboundFicheAction action = (ServerboundFicheAction) packet;
             if(allowClientTransactions==0 || action.getFiches()==0) {
-                connection.sendPacket(new ClientboundNACK((byte) 0x05));
+                connection.sendPacket(ClientboundPacket.createNACK((byte) 0x05));
                 return;
             }
             if(action.getFiches()>0){
                 if(allowClientTransactions!=1){
-                    connection.sendPacket(new ClientboundNACK((byte) 0x05));
+                    connection.sendPacket(ClientboundPacket.createNACK((byte) 0x05));
                     return;
                 }
             }
             if(action.getFiches()<0){
                 if(allowClientTransactions!=-1 || fiches+action.getFiches()<0){
-                    connection.sendPacket(new ClientboundNACK((byte) 0x05));
+                    connection.sendPacket(ClientboundPacket.createNACK((byte) 0x05));
                     return;
                 }
             }
@@ -68,16 +70,16 @@ public class BlackJackPlayer {
             lastTransactionFromClient=true;
             lastTransaction=action.getFiches();
             allowClientTransactions=0;
-            connection.sendPacket(new ClientboundACK((byte) 0x05));
+            connection.sendPacket(ClientboundPacket.createACK((byte) 0x05));
         });
         connection.onPacketReceive((byte) 4, (packet) ->{
             ServerboundPlayAction action = (ServerboundPlayAction) packet;
             if(room==null) {
-                connection.sendPacket(new ClientboundNACK((byte) 0x04));
+                connection.sendPacket(ClientboundPacket.createNACK((byte) 0x04));
                 return;
             }
             room.rotationAction(this, action.isAddCard());
-            connection.sendPacket(new ClientboundACK((byte) 0x04));
+            connection.sendPacket(ClientboundPacket.createACK((byte) 0x04));
         });
 
     }
