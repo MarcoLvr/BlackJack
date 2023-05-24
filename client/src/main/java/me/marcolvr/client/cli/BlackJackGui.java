@@ -65,6 +65,7 @@ public class BlackJackGui extends JFrame implements BlackJackInterface{
 
     @Override
     public void updateLobbyStatus(int players, boolean starting, int time) {
+        setTitle("BlackJack v1.0 - " + client.getUsername());
         if(lobbyPanel==null){
             lobbyPanel=new LobbyPanel(client, layout);
             getContentPane().removeAll();
@@ -94,7 +95,8 @@ public class BlackJackGui extends JFrame implements BlackJackInterface{
                 add(gamePanel);
                 validate();
             }
-            case 3 ->{
+            case 2 ->{
+                System.out.println(selection.equalsIgnoreCase(client.getUsername()));
                 if(selection.equalsIgnoreCase(client.getUsername())) {
                     requestAction();
                 }else{

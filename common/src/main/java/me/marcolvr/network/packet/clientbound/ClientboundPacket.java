@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface ClientboundPacket extends Packet {
 
     enum GameEndState { LOSE, TIE, WIN }
-    enum GameUpdateState { INIT, FICHES_REQUEST, START, PLAYER_ACTION }
+    enum GameUpdateState { INIT, START, PLAYER_ACTION }
     static ClientboundACK ACK(byte referredPacketId){
         return new ClientboundACK(referredPacketId);
     }

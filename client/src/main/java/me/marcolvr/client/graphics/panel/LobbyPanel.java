@@ -41,6 +41,8 @@ public class LobbyPanel extends JPanel {
     public void updateData(int players, boolean starting, int time){
         if(starting){
             statusLabel.setText("Avvio in " + time + " secondi");
+        }else{
+            statusLabel.setText("Attesa di giocatori");
         }
         playersLabel.setText("Giocatori: " + players);
     }

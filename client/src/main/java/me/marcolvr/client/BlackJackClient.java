@@ -2,6 +2,7 @@ package me.marcolvr.client;
 
 import lombok.Getter;
 import lombok.extern.java.Log;
+import me.marcolvr.client.audio.AudioPlayer;
 import me.marcolvr.client.cli.BlackJackCli;
 import me.marcolvr.client.cli.BlackJackGui;
 import me.marcolvr.logger.Logger;
@@ -83,6 +84,7 @@ public class BlackJackClient {
         });
         connection.onPacketReceive((byte) 2, (packet) ->{
             ClientboundLobbyUpdate p = (ClientboundLobbyUpdate) packet;
+            if(p.isStarting() && p.getStartSeconds()<=10) AudioPlayer.pling();
             Logger.info("Lobby update: players=" + p.getPlayers() + " starting=" + p.isStarting() + " time=" + p.getStartSeconds());
             ginterface.updateLobbyStatus(p.getPlayers(), p.isStarting(), p.getStartSeconds());
         });

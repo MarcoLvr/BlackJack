@@ -169,7 +169,8 @@ public class BlackJackRoom {
             player.getCards().add(logic.givePlayerRandomCard());
             //TODO: implement clientside
             //OLD: new ClientboundPlayerUpdate("Banco", 0, logic.getDealer().getCardsValue(), logic.getDealer().getCards().size())
-            player.getConnection().sendPacket(ClientboundPacket.dealerUpdate(logic.getDealer().getCardsValue(), logic.getDealer().getCards().size(), logic.getDealer().lastCardValue()));
+            BlackJackServer.getInstance().multicast(ClientboundPacket.playerUpdate("Banco", 0, logic.getDealer().getCardsValue(), logic.getDealer().getCards().size()), this);
+            // player.getConnection().sendPacket(ClientboundPacket.dealerUpdate(logic.getDealer().getCardsValue(), logic.getDealer().getCards().size(), logic.getDealer().lastCardValue()));
             BlackJackServer.getInstance().multicast(ClientboundPacket.playerUpdate(player.getUsername(), player.getFiches(), player.getCardsValue(), player.getCards().size()), this);
             try {
                 Thread.sleep(50);

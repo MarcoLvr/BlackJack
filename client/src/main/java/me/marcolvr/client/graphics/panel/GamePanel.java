@@ -93,8 +93,8 @@ public class GamePanel extends JPanel {
     }
 
     public void noReqAction(){
-        addCardBtn.setEnabled(true);
-        skipBtn.setEnabled(true);
+        addCardBtn.setEnabled(false);
+        skipBtn.setEnabled(false);
     }
 
     public void setWinstate(String state){

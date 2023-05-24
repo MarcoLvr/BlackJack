@@ -26,7 +26,7 @@ public class HeartbeatTask extends Thread{
             while (iterator.hasNext()){
                 BlackJackPlayer player = iterator.next();
                 if(System.currentTimeMillis()-player.getConnection().getLastSentPacket()>5000){
-                    if(!player.getConnection().sendPacket(ClientboundPacket.createHeartbeat())){
+                    if(!player.getConnection().sendPacket(ClientboundPacket.heartbeat())){
                         toDisconnect.add(player);
                     };
                 }
